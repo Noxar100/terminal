@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Operative Console v4.1</title>
+<style>
+body {
+  background:black;
+  color:#00ff00;
+  font-family:Courier New, monospace;
+  margin:0;
+  padding:20px;
+}
+#terminal {
+  white-space:pre-wrap;
+  line-height:1.5;
+  font-size:15px;
+  max-height:90vh;
+  overflow-y:auto;
+}
+.cursor {
+  display:inline-block;
+  width:10px;
+  background:#00ff00;
+  animation:blink 1s infinite;
+}
+@keyframes blink {50%{opacity:0}}
+#hidden-input {
+  position:absolute;
+  top:-100px;
+  opacity:0;
+}
+</style>
+</head>
+
+<body onclick="focusInput()">
+<div id="terminal"></div>
+<input id="hidden-input" type="text">
+
+<script>
+const terminal = document.getElementById("terminal");
+const input = document.getElementById("hidden-input");
+
+let userInput = "";
+let listening = false;
+
+/* ====== BOOT ====== */
+const bootLines = [
+">> Boot sequence initiated...",
+">> Loading kernel modules...",
+">> Initializing memory sectors...",
+">> Establishing secure entropy pool...",
+">> Connecting to mainframe...",
+">> Verifying identity...",
+">> Access Level: Operative 4",
+">> Authenticating biometric hash...",
+">> Initializing protocols:",
+">>  - breach.sys",
+">>  - node.scan",
+">>  - firewall.override",
+">> Loading encrypted shell...",
+">> Session Token: A9X-23LP-55RE-WX9K",
+">> Secure tunnel established at 172.30.0.44:8080",
+">> Proxy chain: 9 nodes",
+">> Obfuscation layer active",
+"",
+"System Ready.",
+"Type 'help' to list commands.",
+""
+];
+
+function writeLine(t){
+  terminal.innerHTML += t + "\n";
+  terminal.scrollTop = terminal.scrollHeight;
+}
+
+/* ====== BOOT SEQUENCE ====== */
+function boot(i=0){
+  if(i<bootLines.length){
+    writeLine(bootLines[i]);
+    setTimeout(()=>boot(i+1),150);
+  } else {
+    startInput();
+  }
+}
+
+/* ====== INPUT ====== */
+let promptLine = null;
+let promptSpan = null;
+
+function startInput(){
+  listening = true;
+  writePrompt();
+  focusInput();
+  input.addEventListener("input", onInput);
+  input.addEventListener("keydown", onKey);
+}
+
+function writePrompt(){
+  // létrehozunk egy új div-et a promptnak
+  promptLine = document.createElement("div");
+  promptSpan = document.createElement("span");
+  promptSpan.textContent = ">> ";
+  promptLine.appendChild(promptSpan);
+  terminal.appendChild(promptLine);
+  terminal.scrollTop = terminal.scrollHeight;
+}
+
+function focusInput(){ 
+  input.focus(); 
+}
+
+function onInput(e){
+  userInput = e.target.value;
+  if(promptSpan){
+    promptSpan.textContent = ">> " + userInput;
+  }
+}
+
+function onKey(e){
+  if(e.key === "Enter"){
+    // lezárjuk a promptot, új sor a következő kimenethez
+    input.removeEventListener("input", onInput);
+    input.removeEventListener("keydown", onKey);
+    input.value = "";
+    terminal.appendChild(document.createElement("div")); // új sor a következő parancsnak
+    processCommand(userInput.trim().toLowerCase());
+    userInput = "";
+  }
+}
+
+
+/* ====== COMMANDS ====== */
+function processCommand(cmd){
+  listening=false;
+  if(cmd==="help"){
+    writeLine("Available commands:");
+    writeLine(" load    - begin data injection");
+    writeLine(" dir     - scan remote nodes");
+    writeLine(" upload  - exfiltrate payload");
+    writeLine(" clear   - clear screen");
+    writeLine("");
+    startInput();
+  }
+  else if(cmd==="load"){ spam(loadLines,120); }
+  else if(cmd==="dir"){ spam(dirLines,80); }
+  else if(cmd==="upload"){ spam(uploadLines,100); }
+  else if(cmd==="clear"){ terminal.innerHTML=""; startInput(); }
+  else {
+    writeLine("Unknown command: "+cmd);
+    startInput();
+  }
+}
+
+/* ====== DATA SETS ====== */
+const loadLines = [
+"Downloading: /root/db/core/accounts.db",
+"Resolving host...",
+"Connecting to node 221.14.75.9...",
+"Establishing TLS handshake...",
+"TLS cipher: AES-256-GCM",
+"Injecting payload to port 443...",
+"Payload size: 14.2MB",
+"Bypassing firewall...",
+"Firewall rule overridden: fw_rule_203",
+"Escalating privileges...",
+"Privilege level: root",
+"Decrypting blocks...",
+"Decrypting block [1/128]",
+"Decrypting block [2/128]",
+"Decrypting block [17/128]",
+"Decrypting block [64/128]",
+"Decrypting block [128/128]",
+"Checksum verification...",
+"Transfer complete.",
+"Extracting archive: 7z...",
+"Extracting: users.tbl",
+"Extracting: auth.log",
+"Extracting: keys.dat",
+"Extracting: wallets.enc",
+"[OK] user_hash: 9xhhq3z1k29dj31j19jd8312",
+"[OK] user_hash: 2aa91kd8a1dka921jdk19a",
+"[OK] user_hash: f8a91cc9d88d01aa91d0",
+"[OK] ssh_key: AAB3NzaC1yc2EAAAABIwAAAQEArx1zN...",
+"[OK] ssh_key: AAB3NzaC1yc2EAAAABIwAAAQEAs9K2M...",
+"[OK] ssh_key imported to keyring",
+"Mapping remote filesystem...",
+"/etc/passwd",
+"/etc/shadow",
+"/var/log/auth.log",
+"/root/.ssh/id_rsa",
+"Sending ping: 192.168.33.7... pong!",
+"Sending ping: 10.0.0.44... pong!",
+"[+] DNS override active",
+"[+] Remote shell established",
+"[TRACE] packet loss detected",
+"[TRACE] rerouting packets...",
+"[TRACE] route stabilized",
+"[WARN] latency spike channel_07",
+"[WARN] buffer saturation detected",
+"[LOG] crypto.wallet.seed: **encrypted**",
+"[LOG] encryption method: scrypt + aes",
+"Exfiltrating: /etc/passwd > ./dump/passwd.txt",
+"Exfiltrating: /etc/shadow > ./dump/shadow.txt",
+"Exfiltrating: /root/.ssh/id_rsa > ./dump/id_rsa",
+"Creating mirror node...",
+"[+] mirror node created: ghost.vnet.local",
+"Uploading logs to darknet dropzone...",
+"Upload progress: 23%",
+"Upload progress: 51%",
+"Upload progress: 88%",
+"Upload complete.",
+"[INFO] wiping trace logs...",
+"[INFO] clearing bash history",
+"[INFO] removing temp payloads",
+"[INFO] flushing memory buffers",
+"Operation status: SUCCESS"
+];
+
+
+const dirLines = [
+"Scanning subnet 10.0.0.0/16...",
+"10.0.0.1      | ACTIVE | gateway",
+"10.0.0.12     | ACTIVE | ssh,http",
+"10.0.0.18     | ACTIVE | ftp",
+"10.0.0.21     | ACTIVE | telnet",
+"10.0.0.33     | ACTIVE | mysql",
+"10.0.0.44     | ACTIVE | https",
+"10.0.0.57     | ACTIVE | smtp",
+"10.0.0.61     | ACTIVE | api-node",
+"10.0.0.77     | ACTIVE | redis",
+"10.0.0.91     | ACTIVE | proxy",
+"10.0.0.108    | ACTIVE | ssh",
+"10.0.0.132    | ACTIVE | node",
+"10.0.0.156    | ACTIVE | docker",
+"10.0.0.201    | ACTIVE | admin-panel",
+"",
+"172.16.0.0/24 scan initiated...",
+"172.16.0.3    | ACTIVE | router",
+"172.16.0.9    | ACTIVE | node",
+"172.16.0.14   | ACTIVE | camera",
+"172.16.0.22   | ACTIVE | printer",
+"172.16.0.38   | ACTIVE | vpn",
+"172.16.0.44   | ACTIVE | tunnel",
+"172.16.0.71   | ACTIVE | backup",
+"",
+"192.168.1.0/24 scan initiated...",
+"192.168.1.1   | ACTIVE | gateway",
+"192.168.1.7   | ACTIVE | camera",
+"192.168.1.12  | ACTIVE | smart-tv",
+"192.168.1.19  | ACTIVE | iot-sensor",
+"192.168.1.23  | ACTIVE | nas",
+"192.168.1.31  | ACTIVE | media-server",
+"192.168.1.44  | ACTIVE | dev-pc",
+"192.168.1.57  | ACTIVE | laptop",
+"192.168.1.88  | ACTIVE | phone",
+"",
+"Public nodes discovered...",
+"34.81.129.14  | EXTERNAL | cloud-vm",
+"45.77.91.203  | EXTERNAL | relay",
+"62.210.88.9   | EXTERNAL | mirror",
+"89.163.221.54 | EXTERNAL | cdn-edge",
+"104.21.12.88  | EXTERNAL | api-gateway",
+"138.68.77.19  | EXTERNAL | staging",
+"185.199.108.153 | EXTERNAL | github-mirror",
+"",
+"Hidden services...",
+"ghost.vnet.local      | MIRROR",
+"node_x93.hidden       | PROXY",
+"shadow-db.internal    | RESTRICTED",
+"blackcore.mesh        | ENCRYPTED",
+"",
+"Scan complete. 47 nodes discovered."
+];
+
+
+const uploadLines = [
+"Preparing payload...",
+"Scanning local workspace...",
+"Collecting exfiltrated data...",
+"Files queued: 47",
+"Total size: 38.6MB",
+"Compressing files...",
+"Compression method: LZMA",
+"Compression ratio: 62%",
+"Archive created: payload.7z",
+"Encrypting archive...",
+"Encryption: AES-256 + RSA-4096",
+"Generating session key...",
+"Session key locked",
+"Obfuscating file headers...",
+"Connecting to darknet dropzone...",
+"Resolving onion route...",
+"Route hops: 7",
+"Establishing secure tunnel...",
+"Tunnel latency: 183ms",
+"Authenticating dropzone...",
+"Auth token accepted",
+"Uploading blocks [#---------] 5%",
+"Uploading blocks [###-------] 23%",
+"Uploading blocks [#####-----] 41%",
+"Uploading blocks [#######---] 67%",
+"Uploading blocks [#########-] 89%",
+"Uploading blocks [##########] 100%",
+"Upload complete.",
+"Verifying checksum...",
+"Checksum: OK",
+"Validating remote integrity...",
+"[OK] integrity verified",
+"Syncing mirror node...",
+"Mirror status: online",
+"Registering payload hash...",
+"Hash ID: 8f9a2c91eab03f1d",
+"Cleaning local artifacts...",
+"Removing temporary archives...",
+"Purging memory buffers...",
+"Flushing DNS cache...",
+"Closing secure tunnel...",
+"Connection terminated",
+"Upload successful.",
+"Operation status: CLEAN"
+];
+
+/* ====== SPAM ENGINE ====== */
+function spam(arr,max,i=0){
+  if(i>=max){
+    writeLine("");
+    writeLine(">> Awaiting next command.\n");
+    startInput();
+    return;
+  }
+  writeLine(arr[Math.floor(Math.random()*arr.length)]);
+  setTimeout(()=>spam(arr,max,i+1),40+Math.random()*80);
+}
+
+boot();
+</script>
+</body>
+</html>
