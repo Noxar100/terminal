@@ -1,339 +1,1114 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hu">
 <head>
 <meta charset="UTF-8">
-<title>Operative Console v4.1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#050505">
+<title>ShadowNet OS</title>
 <style>
-body {
-  background:black;
-  color:#00ff00;
-  font-family:Courier New, monospace;
-  margin:0;
-  padding:20px;
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#050505;font-family:'Courier New',monospace}
+body{display:flex;flex-direction:column}
+
+#titlebar{
+  background:#0d0d0d;
+  padding:10px 12px 8px;
+  display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid #1a3a1a;
+  flex-shrink:0;
 }
-#terminal {
-  white-space:pre-wrap;
-  line-height:1.5;
-  font-size:15px;
-  max-height:90vh;
+#titlebar .title{font-size:10px;color:#2d6a2d;flex:1;text-align:center;overflow:hidden;white-space:nowrap}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dot.r{background:#ff5f56}.dot.y{background:#ffbd2e}.dot.g{background:#27c93f}
+
+#ht{
+  flex:1;
+  background:#0a0a0a;
+  color:#00ff41;
+  font-size:11px;
+  padding:10px;
   overflow-y:auto;
+  overflow-x:hidden;
+  line-height:1.6;
+  word-break:break-all;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+  scrollbar-color:#1a3a1a #0a0a0a;
 }
-.cursor {
-  display:inline-block;
-  width:10px;
-  background:#00ff00;
-  animation:blink 1s infinite;
+#ht::-webkit-scrollbar{width:3px}
+#ht::-webkit-scrollbar-thumb{background:#1a3a1a}
+
+.ln{display:block;word-wrap:break-word}
+.dim{color:#2a5a2a}.warn{color:#ffaa00}.err{color:#ff4444}
+.info{color:#00aaff}.ok{color:#00ff41}.hi{color:#ffffff}
+.cya{color:#00ffff}.mag{color:#ff44ff}
+
+#inp-row{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 10px;
+  background:#0a0a0a;
+  border-top:1px solid #1a3a1a;
+  flex-shrink:0;
 }
-@keyframes blink {50%{opacity:0}}
-#hidden-input {
-  position:absolute;
-  top:-100px;
-  opacity:0;
+#ps1{color:#00ff41;font-size:11px;white-space:nowrap;flex-shrink:0}
+#inp{
+  flex:1;background:transparent;border:none;outline:none;
+  color:#00ff41;font-family:'Courier New',monospace;
+  font-size:16px; /* 16px = no zoom on iOS */
+  caret-color:#00ff41;
+  min-width:0;
 }
+
+/* quick command buttons */
+#quickbar{
+  display:flex;gap:5px;padding:6px 8px;
+  background:#080808;border-top:1px solid #1a3a1a;
+  overflow-x:auto;flex-shrink:0;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+#quickbar::-webkit-scrollbar{display:none}
+.qbtn{
+  background:#0d1f0d;border:1px solid #1a4a1a;
+  color:#00cc33;font-family:'Courier New',monospace;
+  font-size:10px;padding:5px 9px;border-radius:4px;
+  white-space:nowrap;cursor:pointer;flex-shrink:0;
+}
+.qbtn:active{background:#1a3a1a;color:#00ff41}
+
+#statusbar{
+  display:flex;gap:0;
+  background:#080808;border-top:1px solid #1a3a1a;
+  overflow-x:auto;flex-shrink:0;
+  scrollbar-width:none;
+}
+#statusbar::-webkit-scrollbar{display:none}
+.sb{font-size:9px;color:#2a5a2a;padding:3px 8px;white-space:nowrap;border-right:1px solid #1a3a1a}
+.sb span{color:#00aa30}
 </style>
 </head>
+<body>
 
-<body onclick="focusInput()">
-<div id="terminal"></div>
-<input id="hidden-input" type="text">
+<div id="titlebar">
+  <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+  <div class="title">root@shadownet — encrypted shell v3.7.2</div>
+</div>
+
+<div id="ht"></div>
+
+<div id="quickbar">
+  <button class="qbtn" onclick="runCmd('help')">help</button>
+  <button class="qbtn" onclick="runCmd('whoami')">whoami</button>
+  <button class="qbtn" onclick="runCmd('ps')">ps</button>
+  <button class="qbtn" onclick="runCmd('ls')">ls</button>
+  <button class="qbtn" onclick="runCmd('nmap')">nmap</button>
+  <button class="qbtn" onclick="runCmd('nmap full')">nmap full</button>
+  <button class="qbtn" onclick="runCmd('ifconfig')">ifconfig</button>
+  <button class="qbtn" onclick="runCmd('netstat')">netstat</button>
+  <button class="qbtn" onclick="runCmd('ssh')">ssh</button>
+  <button class="qbtn" onclick="runCmd('hydra')">hydra</button>
+  <button class="qbtn" onclick="runCmd('john')">john</button>
+  <button class="qbtn" onclick="runCmd('hashcat')">hashcat</button>
+  <button class="qbtn" onclick="runCmd('sqlmap')">sqlmap</button>
+  <button class="qbtn" onclick="runCmd('msfconsole')">msf</button>
+  <button class="qbtn" onclick="runCmd('exploit')">exploit</button>
+  <button class="qbtn" onclick="runCmd('wireshark')">wireshark</button>
+  <button class="qbtn" onclick="runCmd('monitor')">monitor</button>
+  <button class="qbtn" onclick="runCmd('trace')">trace</button>
+  <button class="qbtn" onclick="runCmd('dir')">dir</button>
+  <button class="qbtn" onclick="runCmd('dns')">dns</button>
+  <button class="qbtn" onclick="runCmd('arp')">arp</button>
+  <button class="qbtn" onclick="runCmd('load')">load</button>
+  <button class="qbtn" onclick="runCmd('upload')">upload</button>
+  <button class="qbtn" onclick="runCmd('gpg')">gpg</button>
+  <button class="qbtn" onclick="runCmd('wipe')">wipe</button>
+  <button class="qbtn" onclick="runCmd('sniff')">sniff</button>
+  <button class="qbtn" onclick="runCmd('mitm')">mitm</button>
+  <button class="qbtn" onclick="runCmd('top')">top</button>
+  <button class="qbtn" onclick="runCmd('sysinfo')">sysinfo</button>
+  <button class="qbtn" onclick="runCmd('env')">env</button>
+  <button class="qbtn" onclick="runCmd('steganography')">stego</button>
+  <button class="qbtn" onclick="runCmd('cat passwd')">passwd</button>
+  <button class="qbtn" onclick="runCmd('cat shadow')">shadow</button>
+  <button class="qbtn" onclick="runCmd('clear')">clear</button>
+</div>
+
+<div id="inp-row">
+  <span id="ps1">root@shadownet:~#</span>
+  <input id="inp" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+</div>
+
+<div id="statusbar">
+  <div class="sb">NODE: <span id="sb-node">—</span></div>
+  <div class="sb">PROXY: <span>9 hops</span></div>
+  <div class="sb">SESSION: <span id="sb-sess">—</span></div>
+  <div class="sb">UPTIME: <span id="sb-time">00:00:00</span></div>
+  <div class="sb">STATUS: <span style="color:#00ff41">SECURE</span></div>
+</div>
 
 <script>
-const terminal = document.getElementById("terminal");
-const input = document.getElementById("hidden-input");
+const T=document.getElementById('ht');
+const inp=document.getElementById('inp');
+let hist=[],hIdx=-1,startTime=Date.now();
 
-let userInput = "";
-let listening = false;
+setInterval(()=>{
+  const s=Math.floor((Date.now()-startTime)/1000);
+  document.getElementById('sb-time').textContent=
+    String(Math.floor(s/3600)).padStart(2,'0')+':'+
+    String(Math.floor((s%3600)/60)).padStart(2,'0')+':'+
+    String(s%60).padStart(2,'0');
+},1000);
 
-/* ====== BOOT ====== */
-const bootLines = [
-">> Boot sequence initiated...",
-">> Loading kernel modules...",
-">> Initializing memory sectors...",
-">> Establishing secure entropy pool...",
-">> Connecting to mainframe...",
-">> Verifying identity...",
-">> Access Level: Operative 4",
-">> Authenticating biometric hash...",
-">> Initializing protocols:",
-">>  - breach.sys",
-">>  - node.scan",
-">>  - firewall.override",
-">> Loading encrypted shell...",
-">> Session Token: A9X-23LP-55RE-WX9K",
-">> Secure tunnel established at 172.30.0.44:8080",
-">> Proxy chain: 9 nodes",
-">> Obfuscation layer active",
-"",
-"System Ready.",
-"Type 'help' to list commands.",
-""
+const now=()=>new Date().toISOString().replace('T',' ').slice(0,19);
+const rand=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=a=>a[rand(0,a.length-1)];
+const hex=n=>[...Array(n)].map(()=>Math.floor(Math.random()*16).toString(16)).join('');
+const ip=()=>Array(4).fill(0).map(()=>rand(1,254)).join('.');
+const mac=()=>[...Array(6)].map(()=>hex(2)).join(':');
+const hash=()=>hex(64);
+
+const SESSION_NODE=ip();
+const SESSION_ID=hex(4).toUpperCase()+'-'+hex(4).toUpperCase()+'-'+hex(4).toUpperCase();
+document.getElementById('sb-node').textContent=SESSION_NODE;
+document.getElementById('sb-sess').textContent=SESSION_ID;
+
+function w(text,cls=''){
+  const d=document.createElement('span');
+  d.className='ln'+(cls?' '+cls:'');
+  d.innerHTML=text;
+  T.appendChild(d);
+  T.scrollTop=T.scrollHeight;
+}
+
+function delay(lines,interval,done){
+  let i=0;
+  function next(){
+    if(i>=lines.length){done&&done();return;}
+    const item=lines[i];
+    Array.isArray(item)?w(item[0],item[1]||''):w(item);
+    i++;
+    setTimeout(next,interval+rand(0,Math.floor(interval*0.5)));
+  }
+  next();
+}
+
+const BOOT=[
+  ['<span class="cya">╔════════════════════════════════════════╗</span>',''],
+  ['<span class="cya">║</span> <span class="hi">SHADOWNET OS v3.7.2 — Encrypted Shell</span> <span class="cya">║</span>',''],
+  ['<span class="cya">╚════════════════════════════════════════╝</span>',''],
+  [' ',''],
+  [now()+' [0.000] kernel: Linux 6.8.4-shadownet','dim'],
+  [now()+' [0.012] ACPI: RSDP enabled','dim'],
+  [now()+' [0.043] entropy pool: 4096 bits (RDRAND)','dim'],
+  [now()+' [0.071] modules: crypto/aes, net/tun','ok'],
+  [now()+' [0.118] crypto: AES-256-GCM loaded','ok'],
+  [now()+' [0.155] crypto: RSA-4096 engine ready','ok'],
+  [now()+' [0.188] net: eth0 UP — MAC '+mac(),'ok'],
+  [now()+' [0.203] net: tun0 adapter UP','ok'],
+  [now()+' [0.241] tor: daemon started (pid '+rand(400,600)+')','ok'],
+  [now()+' [0.290] proxy: building 9-hop chain...','dim'],
+  [now()+' [0.312] proxy:  hop 1 → '+ip()+' [NL]','dim'],
+  [now()+' [0.328] proxy:  hop 2 → '+ip()+' [RU]','dim'],
+  [now()+' [0.341] proxy:  hop 3 → '+ip()+' [CN]','dim'],
+  [now()+' [0.356] proxy:  hop 4 → '+ip()+' [BR]','dim'],
+  [now()+' [0.370] proxy:  hop 5 → '+ip()+' [DE]','dim'],
+  [now()+' [0.385] proxy:  hop 6 → '+ip()+' [JP]','dim'],
+  [now()+' [0.399] proxy:  hop 7 → '+ip()+' [UA]','dim'],
+  [now()+' [0.412] proxy:  hop 8 → '+ip()+' [RO]','dim'],
+  [now()+' [0.428] proxy:  hop 9 → '+ip()+' [exit]','dim'],
+  [now()+' [0.450] proxy: chain OK — latency '+rand(200,400)+'ms','ok'],
+  [now()+' [0.480] obfuscation: traffic morphing ACTIVE','ok'],
+  [now()+' [0.521] auth: hash 0x'+hex(16)+' — VERIFIED','ok'],
+  [now()+' [0.548] auth: LEVEL 4 OPERATIVE — granted','ok'],
+  [' ',''],
+  ['Session  : <span class="info">'+SESSION_ID+'</span>',''],
+  ['Node     : <span class="info">'+SESSION_NODE+'</span>',''],
+  ['Clearance: <span class="warn">LEVEL 4 — OPERATIVE</span>',''],
+  ['─'.repeat(42),'dim'],
+  [' ',''],
+  ['Type <span class="ok">help</span> or use buttons above.',''],
+  [' ',''],
 ];
 
-function writeLine(t){
-  terminal.innerHTML += t + "\n";
-  terminal.scrollTop = terminal.scrollHeight;
-}
+const HELP=[
+  [' ',''],
+  ['<span class="hi">══ SHADOWNET COMMANDS ══════════════════</span>',''],
+  [' ',''],
+  ['<span class="cya">SYSTEM:</span> whoami  sysinfo  uptime  ps  top',''],
+  ['         ls  env  cat passwd  cat shadow',''],
+  [' ',''],
+  ['<span class="cya">NETWORK:</span> ifconfig  netstat  nmap  nmap full',''],
+  ['          trace  dns  arp  monitor  wireshark',''],
+  ['          ssh  dir',''],
+  [' ',''],
+  ['<span class="cya">OFFENSIVE:</span> hydra  john  hashcat  sqlmap',''],
+  ['           msfconsole  exploit  sniff  mitm',''],
+  [' ',''],
+  ['<span class="cya">DATA OPS:</span> load  upload  gpg  steganography',''],
+  ['          wipe',''],
+  [' ',''],
+  ['<span class="cya">UTIL:</span> clear  help',''],
+  [' ',''],
+  ['<span class="dim">Tip: use the quick-buttons above the keyboard</span>',''],
+  ['─'.repeat(42),'dim'],
+  [' ',''],
+];
 
-/* ====== BOOT SEQUENCE ====== */
-function boot(i=0){
-  if(i<bootLines.length){
-    writeLine(bootLines[i]);
-    setTimeout(()=>boot(i+1),150);
-  } else {
-    startInput();
-  }
-}
+const COMMANDS={
 
-/* ====== INPUT ====== */
-let promptLine = null;
-let promptSpan = null;
+  whoami:()=>delay([
+    [' ',''],
+    ['<span class="hi">OPERATIVE PROFILE</span>',''],
+    ['─'.repeat(38),'dim'],
+    ['UID      : 0 (root)',''],
+    ['GID      : 0 (root)',''],
+    ['Groups   : root shadow sudo adm disk netdev',''],
+    ['Shell    : /bin/bash  [encrypted history]',''],
+    ['Hostname : shadownet-'+hex(6),''],
+    ['Node IP  : '+ip(),''],
+    ['Exit IP  : '+ip()+' [anonymized]',''],
+    ['Clearance: <span class="warn">OPERATIVE LEVEL 4</span>',''],
+    ['Proxy    : 9-hop TOR chain — ACTIVE','ok'],
+    ['Session  : '+hex(32),'dim'],
+    ['Context  : kernel root — full privileges','ok'],
+    ['─'.repeat(38),'dim'],
+    [' ',''],
+  ],45,startInput),
+
+  sysinfo:()=>delay([
+    [' ',''],
+    ['<span class="hi">System Information</span>',''],
+    ['─'.repeat(42),'dim'],
+    ['OS       : ShadowNet Linux 6.8.4 x86_64',''],
+    ['Kernel   : Linux 6.8.4-shadownet #1 SMP',''],
+    ['CPU      : Intel Core i9-14900K @ 5.8GHz',''],
+    ['Cores    : 24 (48 threads)',''],
+    ['Memory   : '+rand(18,28)+'.'+rand(1,9)+'G / 32.0G used',''],
+    ['Swap     : '+rand(1,4)+'.'+rand(0,9)+'G / 16.0G used',''],
+    ['Disk /   : '+rand(80,400)+'G / 2.0T used',''],
+    ['GPU      : NVIDIA RTX 4090 24GB VRAM',''],
+    ['Uptime   : '+rand(1,72)+' hr '+rand(0,59)+' min',''],
+    ['Load avg : '+rand(1,5)+'.'+rand(10,99)+' '+rand(0,3)+'.'+rand(10,99)+' '+rand(0,2)+'.'+rand(10,99),''],
+    ['Entropy  : '+rand(3800,4096)+' / 4096 bits',''],
+    ['─'.repeat(42),'dim'],
+    ['Proxy    : 9 hops — TOR+VPN layered','ok'],
+    ['Encrypt  : AES-256-GCM + RSA-4096','ok'],
+    ['IDS bypass: ACTIVE','ok'],
+    ['Log wipe : ACTIVE (interval: 60s)','ok'],
+    ['─'.repeat(42),'dim'],
+    [' ',''],
+  ],38,startInput),
+
+  uptime:()=>delay([[' ',''],
+    [now()+'  up '+rand(1,72)+' hr '+rand(0,59)+' min,  2 users,  load: '+rand(0,4)+'.'+rand(10,99),'ok'],
+    [' ',''],
+  ],40,startInput),
+
+  uname:()=>delay([[' ',''],
+    ['Linux shadownet-'+hex(4)+' 6.8.4-shadownet #1 SMP x86_64 GNU/Linux','ok'],
+    [' ',''],
+  ],40,startInput),
+
+  env:()=>delay([
+    [' ',''],
+    ['SHELL=/bin/bash','dim'],
+    ['TERM=xterm-256color','dim'],
+    ['HOME=/root','dim'],
+    ['USER=root','dim'],
+    ['PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin','dim'],
+    ['PROXY_CHAIN=socks5://127.0.0.1:9050','info'],
+    ['TOR_CONTROL_PORT=9051','info'],
+    ['HISTFILE=/dev/null','warn'],
+    ['HISTSIZE=0','warn'],
+    ['C2_SERVER='+ip(),'warn'],
+    ['C2_PORT='+rand(4000,9999),'warn'],
+    ['ENCRYPT_KEY='+hex(32),'dim'],
+    ['SESSION_TOKEN='+hex(64),'dim'],
+    ['OBFS_LAYER=obfs4','info'],
+    [' ',''],
+  ],38,startInput),
+
+  top:()=>{
+    const rows=[[' ',''],
+      ['top - '+now().slice(11)+'  up '+rand(1,72)+' hr,  load: '+rand(0,4)+'.'+rand(10,99),'hi'],
+      ['Tasks: '+rand(200,350)+' total, '+rand(1,5)+' running, '+rand(200,340)+' sleeping',''],
+      ['%Cpu: '+rand(10,60)+'.'+rand(0,9)+' us  '+rand(1,10)+'.'+rand(0,9)+' sy  '+rand(20,60)+'.'+rand(0,9)+' id',''],
+      ['MiB Mem: 32768 total  '+rand(5000,15000)+' free  '+rand(8000,20000)+' used',''],
+      [' ',''],
+      ['<span class="hi">PID    USER  %CPU %MEM COMMAND</span>',''],
+      ['─'.repeat(40),'dim'],
+    ];
+    [['1337','root','42.3','0.4','c2_client --stealth'],
+     ['891','root','18.7','0.1','implant.py'],
+     ['441','root','8.1','0.1','tor'],
+     ['512','root','4.2','0.0','proxychains4'],
+     ['2048','root','2.9','0.0','tcpdump'],
+     ['3141','root','1.1','0.6','msfconsole'],
+     ['1','root','0.0','0.0','systemd'],
+    ].forEach(([pid,user,cpu,mem,cmd])=>{
+      const cls=parseFloat(cpu)>20?'warn':parseFloat(cpu)>5?'info':'dim';
+      rows.push([`${pid.padEnd(7)}${user.padEnd(6)}<span class="${cls}">${cpu.padEnd(6)}</span>${mem.padEnd(6)}${cmd}`,'']);
+    });
+    rows.push([' ','']);
+    delay(rows,33,startInput);
+  },
+
+  ps:()=>{
+    const procs=[
+      ['1','root','0.0','0.1','systemd','ok'],
+      ['312','root','0.0','0.0','sshd: /usr/sbin/sshd','dim'],
+      ['441','root','0.1','0.2','tor --defaults-torrc','info'],
+      ['512','root','2.1','1.4','proxychains4','info'],
+      ['623','root','0.0','0.0','watchdog --silent','dim'],
+      ['714','root','0.1','0.3','ncat -lvp 4444','warn'],
+      ['891','root','0.3','0.8','python3 implant.py','warn'],
+      ['1024','root','0.0','0.1','bash','ok'],
+      ['1101','root','0.0','0.0','cron — encrypted','dim'],
+      ['1337','root','4.2','3.1','./c2_client --stealth','warn'],
+      ['1441','root','0.0','0.0','[kworker/0:1]','dim'],
+      ['2048','root','1.1','0.9','tcpdump -i tun0','info'],
+      ['2222','root','0.0','0.0','ncat -lvp 8443','warn'],
+      ['2891','root','0.2','0.4','python3 keylogger.py','err'],
+      ['3141','root','0.5','1.2','msfconsole -q','err'],
+      ['3500','root','0.1','0.2','./log_wiper --interval 60','dim'],
+    ];
+    const rows=[[' ',''],
+      ['<span class="hi">PID    USER  %CPU %MEM COMMAND</span>',''],
+      ['─'.repeat(44),'dim'],
+    ];
+    procs.forEach(([pid,user,cpu,mem,cmd,cls])=>{
+      rows.push([`${pid.padEnd(7)}${user.padEnd(6)}${cpu.padEnd(6)}${mem.padEnd(6)}<span class="${cls}">${cmd}</span>`,'']);
+    });
+    rows.push(['─'.repeat(44),'dim'],
+      [rand(200,350)+' procs  |  mem: '+rand(16,26)+'.'+rand(1,9)+'G used','dim'],
+      [' ','']);
+    delay(rows,33,startInput);
+  },
+
+  ls:()=>delay([
+    [' ',''],
+    ['total 158K','dim'],
+    ['drwxr-x---  root  4.0K  '+now().slice(0,10)+' <span class="ok">./</span>',''],
+    ['drwxr-xr-x  root  4.0K  '+now().slice(0,10)+' <span class="ok">../</span>',''],
+    ['-rw-------  root  14.2K '+now().slice(0,10)+' <span class="info">accounts.db</span>',''],
+    ['-rwxr-x---  root  8.8K  '+now().slice(0,10)+' <span class="warn">c2_client</span>',''],
+    ['-rw-------  root  2.1K  '+now().slice(0,10)+' <span class="dim">config.enc</span>',''],
+    ['drwx------  root  4.0K  '+now().slice(0,10)+' <span class="ok">dump/</span>',''],
+    ['-rw-------  root  38.6M '+now().slice(0,10)+' <span class="info">payload.7z</span>',''],
+    ['-rwxr-----  root  512B  '+now().slice(0,10)+' <span class="warn">implant.py</span>',''],
+    ['-rw-------  root  4.4K  '+now().slice(0,10)+' <span class="warn">keylogger.py</span>',''],
+    ['-rw-r-----  root  1.1K  '+now().slice(0,10)+' <span class="dim">session.log</span>',''],
+    ['drwx------  root  4.0K  '+now().slice(0,10)+' <span class="ok">keys/</span>',''],
+    ['drwx------  root  4.0K  '+now().slice(0,10)+' <span class="ok">exfil/</span>',''],
+    ['-rw-------  root  992B  '+now().slice(0,10)+' <span class="dim">.bash_history → /dev/null</span>',''],
+    [' ',''],
+  ],38,startInput),
+
+  'cat passwd':()=>delay([
+    [' ',''],
+    ['<span class="dim"># /etc/passwd</span>',''],
+    ['root:x:0:0:root:/root:/bin/bash','ok'],
+    ['daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin','dim'],
+    ['bin:x:2:2:bin:/bin:/usr/sbin/nologin','dim'],
+    ['sys:x:3:3:sys:/dev:/usr/sbin/nologin','dim'],
+    ['sync:x:4:65534:sync:/bin:/bin/sync','dim'],
+    ['www-data:x:33:33::/var/www:/usr/sbin/nologin','dim'],
+    ['backup:x:34:34:backup:/var/backups:/usr/sbin/nologin','dim'],
+    ['operator:x:1000:1000::/home/operator:/bin/bash','warn'],
+    ['shadow_user:x:1337:1337::/home/shadow:/bin/zsh','warn'],
+    ['devops:x:1002:1002::/home/devops:/bin/bash','warn'],
+    ['postgres:x:109:114::/var/lib/postgresql:/bin/bash','dim'],
+    ['redis:x:128:136::/var/lib/redis:/usr/sbin/nologin','dim'],
+    ['mysql:x:112:116::/var/lib/mysql:/bin/false','dim'],
+    [' ',''],
+    ['[+] 14 entries dumped → ./dump/passwd.txt','ok'],
+    [' ',''],
+  ],42,startInput),
+
+  'cat shadow':()=>delay([
+    [' ',''],
+    ['<span class="dim"># /etc/shadow — hashed credentials</span>',''],
+    ['root:$6$'+hex(16)+'$'+hex(86)+':19800:0:99999:7:::','warn'],
+    ['operator:$6$'+hex(16)+'$'+hex(86)+':19800:0:99999:7:::','warn'],
+    ['shadow_user:$6$'+hex(16)+'$'+hex(86)+':19800:0:99999:7:::','warn'],
+    ['devops:$6$'+hex(16)+'$'+hex(86)+':19800:0:99999:7:::','warn'],
+    ['postgres:$6$'+hex(16)+'$'+hex(86)+':19721:0:99999:7:::','dim'],
+    [' ',''],
+    ['[+] 5 shadow entries dumped → ./dump/shadow.txt','ok'],
+    ['[*] Use john or hashcat to crack hashes','info'],
+    [' ',''],
+  ],42,startInput),
+
+  ifconfig:()=>delay([
+    [' ',''],
+    ['<span class="hi">tun0</span> flags=4305 mtu 1500',''],
+    ['  inet '+ip()+'  netmask 255.255.255.0','dim'],
+    ['  inet6 fe80::'+hex(4)+':'+hex(4)+'  prefixlen 64','dim'],
+    ['  TX: '+rand(100000,300000)+' pkts  '+rand(80,200)+'.'+rand(1,9)+' MB','dim'],
+    ['  RX: '+rand(80000,200000)+' pkts  '+rand(50,150)+'.'+rand(1,9)+' MB','dim'],
+    [' ',''],
+    ['<span class="hi">eth0</span> flags=4163 mtu 1500',''],
+    ['  inet '+ip()+'  netmask 255.255.0.0','dim'],
+    ['  ether '+mac()+'  txqueuelen 1000','dim'],
+    ['  TX: 6581 pkts  2.4 MB','dim'],
+    ['  RX: 8214 pkts  5.4 MB','dim'],
+    [' ',''],
+    ['<span class="hi">lo</span> flags=73 mtu 65536',''],
+    ['  inet 127.0.0.1  netmask 255.0.0.0','dim'],
+    ['  TX/RX: 24481 pkts  12.3 MB','dim'],
+    [' ',''],
+  ],38,startInput),
+
+  netstat:()=>{
+    const rows=[[' ',''],
+      ['<span class="hi">Active Internet connections</span>',''],
+      ['─'.repeat(44),'dim'],
+      ['Proto  Local:Port   Remote:Port   State','hi'],
+      ['─'.repeat(44),'dim'],
+    ];
+    const states=['ESTABLISHED','TIME_WAIT','LISTEN','SYN_SENT'];
+    for(let i=0;i<16;i++){
+      const lp=rand(1024,65535),fp=rand(1024,65535);
+      const st=pick(states);
+      const cls=st==='ESTABLISHED'?'ok':st==='LISTEN'?'info':st==='SYN_SENT'?'warn':'dim';
+      rows.push([`tcp    0.0.0.0:${lp}  ${ip()}:${fp}  <span class="${cls}">${st}</span>`,'']);
+    }
+    rows.push(['─'.repeat(44),'dim'],[' ','']);
+    delay(rows,26,startInput);
+  },
+
+  nmap:()=>{
+    const target=ip();
+    const rows=[
+      [' ',''],
+      ['Starting Nmap 7.95 at '+now(),'dim'],
+      ['Nmap scan report for '+target,'hi'],
+      ['Host is up (0.0'+rand(10,99)+'s latency).','ok'],
+      ['rDNS: host-'+hex(4)+'.provider.net','dim'],
+      [' ',''],
+      ['<span class="hi">PORT       STATE    SERVICE    VERSION</span>',''],
+      ['─'.repeat(48),'dim'],
+    ];
+    [['21/tcp','open','ftp','vsftpd 3.0.5'],
+     ['22/tcp','open','ssh','OpenSSH 9.3p2'],
+     ['25/tcp','filtered','smtp','—'],
+     ['80/tcp','open','http','nginx 1.25.3'],
+     ['443/tcp','open','https','nginx 1.25.3'],
+     ['3306/tcp','open','mysql','MySQL 8.0.36'],
+     ['4444/tcp','open','unknown','handler'],
+     ['8080/tcp','filtered','http-proxy','—'],
+     ['8443/tcp','open','https-alt','—'],
+     ['27017/tcp','open','mongodb','MongoDB 7.0'],
+    ].forEach(([p,s,svc,v])=>{
+      const cls=s==='open'?'ok':s==='filtered'?'warn':'err';
+      rows.push([`${p.padEnd(12)}<span class="${cls}">${s.padEnd(9)}</span>${svc.padEnd(11)}${v}`,'']);
+    });
+    rows.push(['─'.repeat(48),'dim'],
+      ['OS: Linux 5.x-6.x (96% confidence)','info'],
+      ['Nmap done in '+rand(8,45)+'.'+rand(10,99)+'s','dim'],
+      [' ',''],
+    );
+    delay(rows,42,startInput);
+  },
+
+  'nmap full':()=>{
+    const target=ip();
+    const rows=[[' ',''],
+      ['Nmap 7.95 — full vuln scan — '+target,'dim'],
+      ['Scripts: default, vuln, auth, exploit','dim'],
+      [' ',''],
+    ];
+    for(let p=0;p<7;p++){
+      const svc=pick(['ssh','http','ftp','mysql','smtp','rdp','smb']);
+      const port=pick([21,22,80,443,445,3306,3389]);
+      rows.push([`[+] ${port}/tcp  open  ${svc}`,'ok']);
+      rows.push([`|   version: ${pick(['OpenSSH 7.2','Apache 2.4.49','vsftpd 2.3.4','MySQL 5.5','Samba 3.0.20'])}`,'dim']);
+      if(Math.random()>0.35){
+        const cve='CVE-'+rand(2020,2024)+'-'+rand(10000,55000);
+        rows.push([`|   <span class="err">VULN: ${cve} — CVSS ${rand(7,10)}.${rand(0,9)} CRITICAL</span>`,'']);
+        rows.push([`|   exploit: metasploit module available`,'warn']);
+        rows.push([`|   exploit: PoC: https://github.com/exploit-db/${hex(8)}`,'warn']);
+      } else {
+        rows.push(['|   no known vulnerabilities','dim']);
+      }
+      rows.push(['|_','dim'],[' ','']);
+    }
+    rows.push(['Scan complete. Time: '+rand(60,300)+'s','dim'],[' ','']);
+    delay(rows,40,startInput);
+  },
+
+  dns:()=>{
+    const domain='target-'+hex(4)+'.net';
+    const rows=[[' ',''],
+      ['DNS enumeration: '+domain,'hi'],
+      ['─'.repeat(40),'dim'],
+      ['[*] Querying nameservers...','dim'],
+      ['NS1: ns1.'+domain+' → '+ip(),'ok'],
+      ['NS2: ns2.'+domain+' → '+ip(),'ok'],
+      [' ',''],
+      ['[*] A records...','dim'],
+      [domain+'  A  '+ip(),'ok'],
+      ['www.'+domain+'  A  '+ip(),'ok'],
+      ['mail.'+domain+' A  '+ip(),'ok'],
+      ['admin.'+domain+' A  '+ip(),'warn'],
+      ['vpn.'+domain+'  A  '+ip(),'warn'],
+      ['dev.'+domain+'   A  '+ip(),'warn'],
+      ['api.'+domain+'   A  '+ip(),'warn'],
+      ['staging.'+domain+' A '+ip(),'warn'],
+      [' ',''],
+      ['[*] MX records...','dim'],
+      [domain+' MX 10 mail.'+domain,'ok'],
+      ['[*] TXT records...','dim'],
+      ['v=spf1 include:_spf.'+domain+' ~all','dim'],
+      ['[*] Zone transfer attempt...','dim'],
+      ['[!] Zone transfer ALLOWED — full dump','err'],
+      ['[+] '+rand(20,80)+' subdomains discovered','ok'],
+      ['─'.repeat(40),'dim'],
+      [' ',''],
+    ];
+    delay(rows,42,startInput);
+  },
+
+  arp:()=>{
+    const rows=[[' ',''],
+      ['ARP scan — 192.168.1.0/24','hi'],
+      ['─'.repeat(44),'dim'],
+      ['Address          HWaddress           Iface','dim'],
+    ];
+    for(let i=0;i<14;i++){
+      rows.push(['192.168.1.'+rand(1,254)+'  '+mac()+'  eth0','']);
+    }
+    rows.push(['─'.repeat(44),'dim'],[rand(10,20)+' hosts on local segment','ok'],[' ','']);
+    delay(rows,32,startInput);
+  },
+
+  trace:()=>{
+    const target=ip();
+    const rows=[[' ',''],['traceroute to '+target+', 30 hops max','dim']];
+    for(let i=1;i<=rand(9,16);i++){
+      const ms=rand(2,180);
+      const cls=ms>100?'warn':ms>50?'info':'ok';
+      rows.push([` ${String(i).padEnd(3)} ${ip()}  <span class="${cls}">${ms} ms</span>`,'']);
+    }
+    rows.push([' ',''],['Trace complete.','ok'],[' ','']);
+    delay(rows,70,startInput);
+  },
+
+  monitor:()=>{
+    const rows=[[' ',''],['<span class="hi">LIVE TRAFFIC — tun0</span>  (5s sample)',''],['─'.repeat(46),'dim']];
+    for(let i=0;i<18;i++){
+      const proto=pick(['TCP','UDP','TLS1.3','HTTP2','DNS','ICMP']);
+      const flag=pick(['SYN','ACK','DATA','FIN','RST','PUSH']);
+      rows.push([`${now().slice(11)} ${ip()} → ${ip()} ${proto} ${rand(40,9000)}B [${flag}]`,'dim']);
+    }
+    rows.push(['─'.repeat(46),'dim'],
+      [`Rx: ${rand(1,50)}.${rand(0,9)} MB/s  Tx: ${rand(1,20)}.${rand(0,9)} MB/s`,'ok'],
+      [`Packets: ${rand(1000,9999)}  Dropped: ${rand(0,5)}`,'ok'],
+      [' ',''],
+    );
+    delay(rows,27,startInput);
+  },
+
+  wireshark:()=>{
+    const rows=[[' ',''],
+      ['Capturing on tun0 — promiscuous mode','dim'],
+      ['─'.repeat(52),'dim'],
+      ['<span class="hi">No.  Time    Src IP          Dst IP      Proto</span>',''],
+      ['─'.repeat(52),'dim'],
+    ];
+    const protos=['TCP','UDP','TLS1.3','HTTP/2','DNS','ICMP','ARP','SSH'];
+    const infos=['[SYN]','[ACK]','[PSH,ACK]','[FIN]','[RST]','Query','App Data','Handshake'];
+    for(let i=1;i<=28;i++){
+      rows.push([`${String(i).padEnd(5)}${(i*0.038).toFixed(3).padEnd(8)}${ip().padEnd(16)}${ip().padEnd(12)}${pick(protos)}`,'dim']);
+    }
+    const fname='cap_'+hex(8)+'.pcap';
+    rows.push(['─'.repeat(52),'dim'],
+      ['28 packets  |  '+rand(5,50)+' KB  |  '+rand(1,5)+'.'+rand(0,9)+'s',''],
+      ['Saving: ./dump/'+fname,'ok'],
+      ['[*] Scanning for credential leaks...','dim'],
+      ['[!] HTTP Basic Auth: <span class="warn">admin:'+pick(['pass123','qwerty1','letmein'])+'</span>',''],
+      ['[+] Saved: ./dump/creds_'+hex(4)+'.txt','ok'],
+      [' ',''],
+    );
+    delay(rows,26,startInput);
+  },
+
+  ssh:()=>{
+    const h=ip();
+    const hn='victim-'+hex(4);
+    delay([
+      [' ',''],
+      ['Connecting to '+h+':22...','dim'],
+      ['Loading key: /root/keys/id_rsa_op (RSA 4096)','dim'],
+      ['Fingerprint: SHA256:'+hash().slice(0,43),'dim'],
+      ['PTY allocation accepted on channel 0','dim'],
+      [' ',''],
+      ['<span class="hi">Welcome to Ubuntu 22.04.4 LTS</span>',''],
+      ['Kernel: 6.5.0-35-generic x86_64','dim'],
+      [' ',''],
+      ['Last login: '+now()+' from '+ip(),'dim'],
+      ['<span class="warn">[!] 7 security updates pending</span>',''],
+      [' ',''],
+      ['<span class="ok">root@'+hn+':~#</span> <span class="dim">id</span>',''],
+      ['uid=0(root) gid=0(root) groups=0(root)','ok'],
+      ['<span class="ok">root@'+hn+':~#</span> <span class="dim">uname -a</span>',''],
+      ['Linux '+hn+' 6.5.0-35-generic x86_64 GNU/Linux',''],
+      ['<span class="ok">root@'+hn+':~#</span> <span class="dim">cat /etc/crontab</span>',''],
+      ['<span class="warn">*/5 * * * * root /tmp/.hidden/beacon.sh</span>',''],
+      ['<span class="ok">root@'+hn+':~#</span> <span class="dim">ls /tmp/.hidden/</span>',''],
+      ['<span class="warn">beacon.sh  dropper.elf  cleanup.sh</span>',''],
+      ['<span class="ok">root@'+hn+':~#</span> <span class="dim">exit</span>',''],
+      ['logout','dim'],
+      ['Connection to '+h+' closed.','dim'],
+      [' ',''],
+    ],50,startInput);
+  },
+
+  hydra:()=>{
+    const target=ip();
+    const rows=[[' ',''],
+      ['Hydra v9.5 (c) 2023 van Hauser/THC','dim'],
+      ['[WARN] Many SSH configs limit parallel tasks','warn'],
+      ['[DATA] attacking ssh://'+target+':22/','dim'],
+      ['[DATA] wordlist: /usr/share/wordlists/rockyou.txt','dim'],
+      ['[DATA] 14344399 entries loaded','dim'],
+      [' ',''],
+    ];
+    const counts=[rand(100,300),rand(800,2000),rand(5000,15000),rand(20000,80000),rand(100000,500000)];
+    counts.forEach(n=>{
+      rows.push(['[STATUS] '+rand(80,200)+' tries/min — '+n+' tried','dim']);
+    });
+    rows.push(
+      [' ',''],
+      ['[22][ssh] host: '+target+'   login: <span class="info">root</span>',''],
+      ['  password: <span class="warn">'+pick(['toor','shadow2024','r00t@net','P@$$w0rd','0perat0r!'])+'</span>',''],
+      ['[22][ssh] host: '+target+'   login: <span class="info">admin</span>',''],
+      ['  password: <span class="warn">'+pick(['admin123','adm1n!','hunter2','sup3r_adm1n'])+'</span>',''],
+      [' ',''],
+      ['[STATUS] attack finished — 2 valid passwords found','ok'],
+      ['[+] Saved: ./dump/ssh_creds_'+hex(4)+'.txt','ok'],
+      [' ',''],
+    );
+    delay(rows,52,startInput);
+  },
+
+  john:()=>{
+    const rows=[[' ',''],
+      ['John the Ripper 1.9.0-jumbo','dim'],
+      ['Loaded 8 hashes (sha512crypt [SHA512 AVX2])','dim'],
+      ['Cost: iteration_count=5000 per hash','dim'],
+      ['Wordlist: /usr/share/wordlists/rockyou.txt','dim'],
+      [' ',''],
+    ];
+    const cracked=[
+      pick(['hunter2','p@ssw0rd','letmein1','qwerty123','admin2024']),
+      pick(['shadow!1','netw0rk','root_2024','op3rat0r']),
+      pick(['sunshine','monkey1','pass1234','iloveyou']),
+      null,null,null,null,null,
+    ];
+    Array.from({length:8},()=>hex(32)).forEach((h,i)=>{
+      if(cracked[i]) rows.push(['<span class="ok">[CRACKED]</span> $6$'+hex(8)+'$'+h.slice(0,16)+'…  →  <span class="warn">'+cracked[i]+'</span>','']);
+      else rows.push(['<span class="dim">[PENDING]</span> $6$'+hex(8)+'$'+h.slice(0,16)+'…  ('+rand(20000,200000)+' g/s)','dim']);
+    });
+    rows.push([' ',''],['3/8 hashes cracked, 5 remaining','ok'],['Use --show to display all cracked','dim'],[' ','']);
+    delay(rows,48,startInput);
+  },
+
+  hashcat:()=>{
+    const rows=[[' ',''],
+      ['hashcat (v6.2.6)','dim'],
+      ['Device #1: RTX 4090, 24318MB, 128MCU','info'],
+      ['Device #2: RTX 4090, 24318MB, 128MCU','info'],
+      [' ',''],
+      ['Hash-mode: 1000 (NTLM)','dim'],
+      ['Speed.#1: '+rand(80000,120000)+' MH/s  (TEMP: '+rand(60,85)+'°C)','ok'],
+      ['Speed.#2: '+rand(80000,120000)+' MH/s  (TEMP: '+rand(60,85)+'°C)','ok'],
+      ['Speed.*:  '+rand(160000,240000)+' MH/s total','ok'],
+      [' ',''],
+    ];
+    for(let i=0;i<10;i++){
+      rows.push([hex(32)+':'+pick(['hunter2','P@ssw0rd','letmein','netw0rk1','r00tkit','shadowx','toor']),'warn']);
+    }
+    rows.push([' ',''],
+      ['Status: <span class="ok">Cracked</span>  |  Hash.Type: NTLM',''],
+      ['Recovered: 10/10 (100.00%)','ok'],
+      ['Speed avg: '+rand(160000,240000)+' MH/s','ok'],
+      [' ',''],
+    );
+    delay(rows,40,startInput);
+  },
+
+  sqlmap:()=>{
+    const target='http://'+ip()+'/index.php?id=1';
+    const rows=[[' ',''],
+      ['sqlmap v1.8.1 — automatic SQL injection','dim'],
+      ['Target: '+target,'dim'],
+      ['[*] testing connection...','dim'],
+      ['[*] checking WAF/IPS...','dim'],
+      ['[!] WAF: ModSecurity detected — bypassing','warn'],
+      ['[+] WAF bypassed: tamper=charencode,randomcase','ok'],
+      ['[*] testing GET param \'id\'...','dim'],
+      [' ',''],
+      ['[+] \'id\' is injectable:','ok'],
+      ['    → <span class="warn">boolean-based blind</span>',''],
+      ['    → <span class="warn">UNION-based (3 columns)</span>',''],
+      ['    → <span class="warn">time-based blind</span>',''],
+      ['    → <span class="warn">stacked queries</span>',''],
+      [' ',''],
+      ['back-end DBMS: <span class="info">MySQL >= 5.6</span>',''],
+      ['server OS:    <span class="info">Linux Ubuntu</span>',''],
+      ['web tech:     <span class="info">PHP 8.1, nginx 1.25</span>',''],
+      [' ',''],
+      ['[*] fetching databases...','dim'],
+      ['[+] information_schema, mysql, app_db, logs_db','info'],
+      ['[*] fetching tables from app_db...','dim'],
+      ['[+] users, sessions, payments, admin_logs, tokens','info'],
+      ['[*] dumping users...','dim'],
+      ['[+] '+rand(200,5000)+' rows → ./dump/users_'+hex(4)+'.csv','ok'],
+      ['[*] dumping admin_logs...','dim'],
+      ['[+] '+rand(100,2000)+' rows → ./dump/admin_'+hex(4)+'.csv','ok'],
+      ['[*] checking file read/write...','dim'],
+      ['[+] FILE privilege: YES — can read /etc/passwd','warn'],
+      ['[+] INTO OUTFILE: YES — can write webshell','warn'],
+      [' ',''],
+    ];
+    delay(rows,45,startInput);
+  },
+
+  msfconsole:()=>delay([
+    [' ',''],
+    ['<span class="hi">  =[ metasploit v6.4.1-dev ]</span>',''],
+    ['+ --=[ 2390 exploits - 1232 auxiliary ]','dim'],
+    ['+ --=[ 1394 payloads - 47 encoders   ]','dim'],
+    [' ',''],
+    ['msf6 > <span class="dim">use exploit/multi/handler</span>',''],
+    ['[*] Payload: generic/shell_reverse_tcp','dim'],
+    ['msf6(handler) > <span class="dim">set LHOST 0.0.0.0</span>',''],
+    ['msf6(handler) > <span class="dim">set LPORT 4444</span>',''],
+    ['msf6(handler) > <span class="dim">run</span>',''],
+    ['[*] Reverse TCP handler on 0.0.0.0:4444','dim'],
+    ['[*] Sending stage ('+rand(200,400)+' bytes) to '+ip(),'dim'],
+    ['[*] <span class="ok">Meterpreter session 1 opened</span>',''],
+    [' ',''],
+    ['meterpreter > <span class="dim">sysinfo</span>',''],
+    ['Computer: SHADOW-HOST  OS: Linux 6.5  Arch: x64','info'],
+    ['meterpreter > <span class="dim">getuid</span>',''],
+    ['uid=0(root) gid=0(root)','ok'],
+    ['meterpreter > <span class="dim">hashdump</span>',''],
+    ['root:0:'+hex(32)+':'+hex(32)+':::','warn'],
+    ['operator:1000:'+hex(32)+':'+hex(32)+':::','warn'],
+    ['shadow_user:1337:'+hex(32)+':'+hex(32)+':::','warn'],
+    ['meterpreter > <span class="dim">run post/multi/manage/shell_to_meterpreter</span>',''],
+    ['[*] Upgrading session...','dim'],
+    ['[+] Session upgraded.','ok'],
+    ['meterpreter > <span class="dim">exit</span>',''],
+    ['[*] Shutting down Meterpreter...','dim'],
+    ['msf6 > exit','dim'],
+    [' ',''],
+  ],55,startInput),
+
+  exploit:()=>{
+    const cve='CVE-'+rand(2020,2024)+'-'+rand(10000,99999);
+    const cvss=rand(7,10)+'.'+rand(0,9);
+    const tgt=ip();
+    const port_=pick([80,443,22,8080,3306,445,3389]);
+    const rows=[[' ',''],
+      ['[*] Loading exploit module: '+cve,'dim'],
+      ['[*] CVSS Score: <span class="warn">'+cvss+' (CRITICAL)</span>',''],
+      ['[*] Target: '+tgt+':'+port_,'dim'],
+      ['[*] Fingerprinting target...','dim'],
+      ['[+] Detected: '+pick(['Apache 2.4.49','OpenSSH 7.2','Samba 3.0.20','vsftpd 2.3.4','MySQL 5.5']),'info'],
+      ['[+] Vulnerable version confirmed','ok'],
+      ['[*] Generating shellcode...','dim'],
+      ['[*] Encoder: x86/shikata_ga_nai  (iterations: 5)','dim'],
+      ['[*] Payload size: '+rand(400,2000)+' bytes','dim'],
+      ['[*] Bypassing ASLR...','dim'],
+      ['[!] ASLR bypassed via heap spray','warn'],
+      ['[*] Bypassing DEP/NX...','dim'],
+      ['[!] DEP bypassed via ROP chain','warn'],
+      ['[*] Bypassing stack canaries...','dim'],
+      ['[+] Stack canary leaked: 0x'+hex(16),'ok'],
+      ['[*] Sending exploit buffer...','dim'],
+      ['[*] Waiting for shell...','dim'],
+      ['[+] <span class="ok">Shell obtained!</span>',''],
+      ['[+] UID: root   Hostname: victim-'+hex(4),'ok'],
+      ['[*] Migrating to stable process (svchost)...','dim'],
+      ['[+] Migration successful. PID: '+rand(1000,5000),'ok'],
+      ['[*] Installing persistence...','dim'],
+      ['[+] Cron backdoor installed: /tmp/.x/persist.sh','warn'],
+      ['[+] Session established. Persistence confirmed.','ok'],
+      [' ',''],
+    ];
+    delay(rows,52,startInput);
+  },
+
+  sniff:()=>{
+    const rows=[[' ',''],
+      ['Starting credential sniffer on tun0...','dim'],
+      ['Monitoring protocols: FTP, TELNET, HTTP, SMTP, IMAP, POP3','dim'],
+      ['─'.repeat(44),'dim'],
+      [' ',''],
+    ];
+    for(let i=0;i<8;i++){
+      const proto=pick(['FTP','TELNET','HTTP','SMTP','IMAP','POP3']);
+      const user=pick(['admin','root','user1','john','alice','bob','webmaster']);
+      const pass=pick(['pass123','admin1','qwerty','p@ssword','letmein','toor','secret']);
+      rows.push(['['+proto+'] '+ip()+' → '+ip(),'dim']);
+      rows.push(['  USER: <span class="info">'+user+'</span>  PASS: <span class="warn">'+pass+'</span>','']);
+    }
+    rows.push([' ',''],
+      ['[+] '+rand(5,20)+' credentials captured','ok'],
+      ['[+] Saved: ./dump/sniffed_creds_'+hex(4)+'.txt','ok'],
+      [' ',''],
+    );
+    delay(rows,60,startInput);
+  },
+
+  mitm:()=>{
+    const gw=ip(),victim=ip();
+    const rows=[[' ',''],
+      ['Man-in-the-Middle Attack','hi'],
+      ['─'.repeat(42),'dim'],
+      ['[*] Target:  '+victim,'dim'],
+      ['[*] Gateway: '+gw,'dim'],
+      ['[*] Interface: eth0','dim'],
+      [' ',''],
+      ['[*] Sending ARP poison to '+victim+'...','dim'],
+      ['    → Telling '+victim+': "Gateway is at '+mac()+'"','warn'],
+      ['[*] Sending ARP poison to '+gw+'...','dim'],
+      ['    → Telling '+gw+': "'+victim+' is at '+mac()+'"','warn'],
+      [' ',''],
+      ['[+] ARP tables poisoned — traffic redirected','ok'],
+      ['[*] Enabling IP forwarding...','dim'],
+      ['[+] IP forward: ON','ok'],
+      ['[*] Starting SSL stripping...','dim'],
+      ['[+] SSLstrip active — downgrading HTTPS → HTTP','warn'],
+      [' ',''],
+      ['[*] Intercepted requests:','dim'],
+    ];
+    for(let i=0;i<6;i++){
+      rows.push([`  ${now().slice(11)} ${victim} → ${pick(['facebook.com','gmail.com','bank.net','paypal.com','twitter.com'])}`,'dim']);
+      if(Math.random()>0.5){
+        rows.push(['  <span class="warn">[CREDS] '+pick(['admin','user','john'])+' : '+pick(['pass123','qwerty','toor'])+'</span>','']);
+      }
+    }
+    rows.push([' ',''],['[+] Capture running — Ctrl+C to stop','ok'],[' ','']);
+    delay(rows,55,startInput);
+  },
+
+  gpg:()=>delay([
+    [' ',''],
+    ['GPG — GNU Privacy Guard 2.4.5','dim'],
+    ['[*] Encrypting payload.7z...','dim'],
+    ['[*] Key: 0x'+hex(8).toUpperCase()+' <shadow@op.net>','info'],
+    ['[*] Algorithm: RSA-4096 + AES-256','dim'],
+    ['[*] Generating session key...','dim'],
+    ['[*] Session key: '+hex(32),'dim'],
+    [' ',''],
+    ['Progress: [####------] 40%','dim'],
+    ['Progress: [#######---] 70%','dim'],
+    ['Progress: [##########] 100%','ok'],
+    [' ',''],
+    ['Output: payload.7z.gpg ('+rand(38,55)+'.'+rand(0,9)+'MB)','ok'],
+    ['Signature: 0x'+hex(40),'dim'],
+    ['Fingerprint verified ✓','ok'],
+    [' ',''],
+  ],48,startInput),
+
+  steganography:()=>{
+    const img=pick(['photo_vacation.jpg','profile_pic.png','logo.jpg','background.png','avatar.jpg']);
+    const rows=[[' ',''],
+      ['Steganography — Hide data in image','hi'],
+      ['─'.repeat(40),'dim'],
+      ['[*] Cover image: ./images/'+img,'dim'],
+      ['[*] Secret data: payload.7z.gpg','dim'],
+      ['[*] Algorithm: LSB (Least Significant Bit)','dim'],
+      ['[*] Capacity: '+rand(2,8)+'.'+rand(0,9)+'MB available','dim'],
+      [' ',''],
+      ['[*] Analyzing image structure...','dim'],
+      ['[*] Image: '+rand(1920,4000)+'x'+rand(1080,3000)+' px  |  '+rand(3,12)+'MB','dim'],
+      ['[*] Embedding data...','dim'],
+      ['Progress [###-------] 30%','dim'],
+      ['Progress [######----] 60%','dim'],
+      ['Progress [##########] 100%','ok'],
+      [' ',''],
+      ['[+] Data embedded successfully','ok'],
+      ['[+] Output: ./exfil/'+img,'ok'],
+      ['[+] Image appears identical to original (PSNR: 52dB)','ok'],
+      ['[*] Stego key: '+hex(32),'dim'],
+      ['[*] To extract: steghide extract -sf '+img+' -p <key>','dim'],
+      [' ',''],
+    ];
+    delay(rows,48,startInput);
+  },
+
+  wipe:()=>delay([
+    [' ',''],
+    ['Secure data wipe — DoD 5220.22-M standard','hi'],
+    ['─'.repeat(44),'dim'],
+    ['[*] Targets: ./dump/  ./exfil/  /tmp/  bash_history','dim'],
+    [' ',''],
+    ['[*] Pass 1/3 — writing 0x00 pattern...','dim'],
+    ['Progress [##########] 100%  ✓','ok'],
+    ['[*] Pass 2/3 — writing 0xFF pattern...','dim'],
+    ['Progress [##########] 100%  ✓','ok'],
+    ['[*] Pass 3/3 — writing random data...','dim'],
+    ['Progress [##########] 100%  ✓','ok'],
+    [' ',''],
+    ['[*] Overwriting file metadata...','dim'],
+    ['[*] Randomizing timestamps...','dim'],
+    ['[*] Unlinking inodes...','dim'],
+    ['[*] Flushing kernel page cache...','dim'],
+    ['[*] Clearing swap space...','dim'],
+    ['[*] Zeroing memory buffers...','dim'],
+    ['[*] Flushing DNS resolver cache...','dim'],
+    ['[*] Clearing bash history → /dev/null','dim'],
+    ['[*] Removing /tmp/.*','dim'],
+    ['[*] Clearing /var/log/auth.log...','dim'],
+    ['[*] Clearing /var/log/syslog...','dim'],
+    [' ',''],
+    ['[+] Wipe complete — no forensic trace','ok'],
+    ['[+] '+rand(200,1000)+' MB securely overwritten','ok'],
+    [' ',''],
+  ],50,startInput),
+
+  dir:()=>{
+    const rows=[[' ',''],['Scanning 10.0.0.0/16 ...','dim'],['─'.repeat(44),'dim']];
+    for(let i=0;i<14;i++){
+      rows.push([ip().padEnd(17)+'| <span class="ok">ACTIVE</span> | '+pick(['ssh,http','https','ftp','mysql','redis','proxy','api','docker','admin','smtp']),'']);
+    }
+    rows.push([' ',''],['172.16.0.0/24 ...','dim'],['─'.repeat(44),'dim']);
+    for(let i=0;i<8;i++){
+      rows.push([ip().padEnd(17)+'| <span class="ok">ACTIVE</span> | '+pick(['router','vpn','camera','backup','tunnel','node','nas']),'']);
+    }
+    rows.push([' ',''],['192.168.1.0/24 ...','dim'],['─'.repeat(44),'dim']);
+    for(let i=0;i<6;i++){
+      rows.push([ip().padEnd(17)+'| <span class="ok">ACTIVE</span> | '+pick(['smart-tv','iot-sensor','nas','media-srv','dev-pc','phone']),'']);
+    }
+    rows.push([' ',''],
+      ['ghost.vnet.local    | <span class="warn">MIRROR</span>',''],
+      ['shadow-db.internal  | <span class="err">RESTRICTED</span>',''],
+      ['blackcore.mesh      | <span class="dim">ENCRYPTED</span>',''],
+      ['c2.hidden.onion     | <span class="mag">C2 SERVER</span>',''],
+      [' ',''],
+      ['Scan complete. '+rand(35,70)+' nodes found.','ok'],
+      [' ',''],
+    );
+    delay(rows,35,startInput);
+  },
+
+  load:()=>delay([
+    [' ',''],
+    ['Data Injection Module v2.3','hi'],
+    ['─'.repeat(40),'dim'],
+    ['[*] Resolving target host...','dim'],
+    ['[*] Connecting to '+ip()+':443...','dim'],
+    ['[+] TLS 1.3 handshake: AES-256-GCM','ok'],
+    ['[*] Injecting payload to port 443...',''],
+    ['[*] Firewall rule override: fw_rule_'+rand(100,300),'warn'],
+    ['[+] Firewall bypassed','ok'],
+    ['[*] Escalating privileges...','dim'],
+    ['[+] Privilege escalation → root','ok'],
+    ['[*] Decrypting archive ('+rand(100,200)+' blocks)...','dim'],
+    ['[+] Extracting: users.tbl','ok'],
+    ['[+] Extracting: auth.log','ok'],
+    ['[+] Extracting: keys.dat','ok'],
+    ['[+] Extracting: wallets.enc','ok'],
+    ['[+] Extracting: tokens.db','ok'],
+    ['[+] '+rand(3,8)+' SSH keys imported to keyring','ok'],
+    ['[+] '+rand(20,80)+' user hashes extracted','ok'],
+    ['[+] '+rand(5,30)+' API tokens captured','ok'],
+    ['[*] Exfiltrating /etc/shadow → ./dump/shadow.txt','warn'],
+    ['[*] Exfiltrating /root/.ssh/id_rsa → ./dump/id_rsa','warn'],
+    ['[*] Exfiltrating /var/lib/mysql/ → ./dump/mysql_dump/','warn'],
+    ['[*] Uploading to darknet dropzone...','dim'],
+    ['Progress [####------] 40%','dim'],
+    ['Progress [#######---] 70%','dim'],
+    ['Progress [##########] 100%','ok'],
+    ['[*] Wiping trace logs...','dim'],
+    ['[*] Clearing bash history','dim'],
+    ['[*] Removing temp payloads','dim'],
+    ['[*] Flushing memory buffers','dim'],
+    ['─'.repeat(40),'dim'],
+    ['[SUCCESS] Operation complete.','ok'],
+    [' ',''],
+  ],48,startInput),
+
+  upload:()=>delay([
+    [' ',''],
+    ['Payload Exfiltration Module','hi'],
+    ['─'.repeat(40),'dim'],
+    ['[*] Scanning workspace...','dim'],
+    ['[*] Files queued: '+rand(30,80),'dim'],
+    ['[*] Total size: '+rand(30,90)+'.'+rand(1,9)+'MB','dim'],
+    ['[*] Compressing: LZMA2 level 9...','dim'],
+    ['[+] Ratio: '+rand(55,75)+'%  Archive: payload_'+hex(4)+'.7z','ok'],
+    ['[*] Encrypting: AES-256 + RSA-4096...','dim'],
+    ['[*] Generating ephemeral session key...','dim'],
+    ['[+] Session key: '+hex(32),'dim'],
+    ['[*] Obfuscating file headers...','dim'],
+    ['[*] Splitting into '+rand(5,20)+' chunks...','dim'],
+    ['[*] Resolving onion route (7 hops)...','dim'],
+    ['[+] Route: '+ip()+' → '+ip()+' → '+ip()+' → [exit]','dim'],
+    ['[*] Tunnel latency: '+rand(100,400)+'ms','dim'],
+    ['[*] Authenticating dropzone...','dim'],
+    ['[+] Auth token accepted','ok'],
+    [' ',''],
+    ['Uploading [##--------] 20%','dim'],
+    ['Uploading [####------] 40%','dim'],
+    ['Uploading [######----] 60%','dim'],
+    ['Uploading [########--] 80%','dim'],
+    ['Uploading [##########] 100%','ok'],
+    [' ',''],
+    ['[+] Checksum: SHA256:'+hex(64),'ok'],
+    ['[+] Remote integrity verified','ok'],
+    ['[+] Hash ID: '+hex(16),'dim'],
+    ['[*] Syncing mirror node...','dim'],
+    ['[+] Mirror: online — data replicated','ok'],
+    ['[*] Cleaning local artifacts...','dim'],
+    ['[*] Purging temp files, flushing DNS...','dim'],
+    ['─'.repeat(40),'dim'],
+    ['[SUCCESS] Upload clean. No trace.','ok'],
+    [' ',''],
+  ],45,startInput),
+
+  clear:()=>{T.innerHTML='';startInput();}
+};
 
 function startInput(){
-  listening = true;
-  writePrompt();
-  focusInput();
-  input.addEventListener("input", onInput);
-  input.addEventListener("keydown", onKey);
+  inp.disabled=false;
+  inp.focus();
 }
 
-function writePrompt(){
-  // létrehozunk egy új div-et a promptnak
-  promptLine = document.createElement("div");
-  promptSpan = document.createElement("span");
-  promptSpan.textContent = ">> ";
-  promptLine.appendChild(promptSpan);
-  terminal.appendChild(promptLine);
-  terminal.scrollTop = terminal.scrollHeight;
+function runCmd(cmd){
+  if(inp.disabled) return;
+  inp.value=cmd;
+  inp.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
 }
 
-function focusInput(){ 
-  input.focus(); 
-}
-
-function onInput(e){
-  userInput = e.target.value;
-  if(promptSpan){
-    promptSpan.textContent = ">> " + userInput;
+inp.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const cmd=inp.value.trim().toLowerCase();
+    inp.value='';
+    if(!cmd){w('');return;}
+    hist.unshift(cmd);hIdx=-1;
+    w('<span class="dim">'+now()+'</span> <span class="ok">root@shadownet:~#</span> '+cmd);
+    inp.disabled=true;
+    if(COMMANDS[cmd]) COMMANDS[cmd]();
+    else if(cmd==='help') delay(HELP,28,startInput);
+    else{w('<span class="err">bash: '+cmd+': command not found</span>');w('');startInput();}
   }
-}
+  if(e.key==='ArrowUp'){e.preventDefault();if(hIdx<hist.length-1){hIdx++;inp.value=hist[hIdx];}}
+  if(e.key==='ArrowDown'){e.preventDefault();if(hIdx>0){hIdx--;inp.value=hist[hIdx];}else{hIdx=-1;inp.value='';}}
+});
 
-function onKey(e){
-  if(e.key === "Enter"){
-    // lezárjuk a promptot, új sor a következő kimenethez
-    input.removeEventListener("input", onInput);
-    input.removeEventListener("keydown", onKey);
-    input.value = "";
-    terminal.appendChild(document.createElement("div")); // új sor a következő parancsnak
-    processCommand(userInput.trim().toLowerCase());
-    userInput = "";
-  }
-}
+// tap outside input → refocus
+document.getElementById('ht').addEventListener('click',()=>inp.focus());
 
-
-/* ====== COMMANDS ====== */
-function processCommand(cmd){
-  listening=false;
-  if(cmd==="help"){
-    writeLine("Available commands:");
-    writeLine(" load    - begin data injection");
-    writeLine(" dir     - scan remote nodes");
-    writeLine(" upload  - exfiltrate payload");
-    writeLine(" clear   - clear screen");
-    writeLine("");
-    startInput();
-  }
-  else if(cmd==="load"){ spam(loadLines,120); }
-  else if(cmd==="dir"){ spam(dirLines,80); }
-  else if(cmd==="upload"){ spam(uploadLines,100); }
-  else if(cmd==="clear"){ terminal.innerHTML=""; startInput(); }
-  else {
-    writeLine("Unknown command: "+cmd);
-    startInput();
-  }
-}
-
-/* ====== DATA SETS ====== */
-const loadLines = [
-"Downloading: /root/db/core/accounts.db",
-"Resolving host...",
-"Connecting to node 221.14.75.9...",
-"Establishing TLS handshake...",
-"TLS cipher: AES-256-GCM",
-"Injecting payload to port 443...",
-"Payload size: 14.2MB",
-"Bypassing firewall...",
-"Firewall rule overridden: fw_rule_203",
-"Escalating privileges...",
-"Privilege level: root",
-"Decrypting blocks...",
-"Decrypting block [1/128]",
-"Decrypting block [2/128]",
-"Decrypting block [17/128]",
-"Decrypting block [64/128]",
-"Decrypting block [128/128]",
-"Checksum verification...",
-"Transfer complete.",
-"Extracting archive: 7z...",
-"Extracting: users.tbl",
-"Extracting: auth.log",
-"Extracting: keys.dat",
-"Extracting: wallets.enc",
-"[OK] user_hash: 9xhhq3z1k29dj31j19jd8312",
-"[OK] user_hash: 2aa91kd8a1dka921jdk19a",
-"[OK] user_hash: f8a91cc9d88d01aa91d0",
-"[OK] ssh_key: AAB3NzaC1yc2EAAAABIwAAAQEArx1zN...",
-"[OK] ssh_key: AAB3NzaC1yc2EAAAABIwAAAQEAs9K2M...",
-"[OK] ssh_key imported to keyring",
-"Mapping remote filesystem...",
-"/etc/passwd",
-"/etc/shadow",
-"/var/log/auth.log",
-"/root/.ssh/id_rsa",
-"Sending ping: 192.168.33.7... pong!",
-"Sending ping: 10.0.0.44... pong!",
-"[+] DNS override active",
-"[+] Remote shell established",
-"[TRACE] packet loss detected",
-"[TRACE] rerouting packets...",
-"[TRACE] route stabilized",
-"[WARN] latency spike channel_07",
-"[WARN] buffer saturation detected",
-"[LOG] crypto.wallet.seed: **encrypted**",
-"[LOG] encryption method: scrypt + aes",
-"Exfiltrating: /etc/passwd > ./dump/passwd.txt",
-"Exfiltrating: /etc/shadow > ./dump/shadow.txt",
-"Exfiltrating: /root/.ssh/id_rsa > ./dump/id_rsa",
-"Creating mirror node...",
-"[+] mirror node created: ghost.vnet.local",
-"Uploading logs to darknet dropzone...",
-"Upload progress: 23%",
-"Upload progress: 51%",
-"Upload progress: 88%",
-"Upload complete.",
-"[INFO] wiping trace logs...",
-"[INFO] clearing bash history",
-"[INFO] removing temp payloads",
-"[INFO] flushing memory buffers",
-"Operation status: SUCCESS"
-];
-
-
-const dirLines = [
-"Scanning subnet 10.0.0.0/16...",
-"10.0.0.1      | ACTIVE | gateway",
-"10.0.0.12     | ACTIVE | ssh,http",
-"10.0.0.18     | ACTIVE | ftp",
-"10.0.0.21     | ACTIVE | telnet",
-"10.0.0.33     | ACTIVE | mysql",
-"10.0.0.44     | ACTIVE | https",
-"10.0.0.57     | ACTIVE | smtp",
-"10.0.0.61     | ACTIVE | api-node",
-"10.0.0.77     | ACTIVE | redis",
-"10.0.0.91     | ACTIVE | proxy",
-"10.0.0.108    | ACTIVE | ssh",
-"10.0.0.132    | ACTIVE | node",
-"10.0.0.156    | ACTIVE | docker",
-"10.0.0.201    | ACTIVE | admin-panel",
-"",
-"172.16.0.0/24 scan initiated...",
-"172.16.0.3    | ACTIVE | router",
-"172.16.0.9    | ACTIVE | node",
-"172.16.0.14   | ACTIVE | camera",
-"172.16.0.22   | ACTIVE | printer",
-"172.16.0.38   | ACTIVE | vpn",
-"172.16.0.44   | ACTIVE | tunnel",
-"172.16.0.71   | ACTIVE | backup",
-"",
-"192.168.1.0/24 scan initiated...",
-"192.168.1.1   | ACTIVE | gateway",
-"192.168.1.7   | ACTIVE | camera",
-"192.168.1.12  | ACTIVE | smart-tv",
-"192.168.1.19  | ACTIVE | iot-sensor",
-"192.168.1.23  | ACTIVE | nas",
-"192.168.1.31  | ACTIVE | media-server",
-"192.168.1.44  | ACTIVE | dev-pc",
-"192.168.1.57  | ACTIVE | laptop",
-"192.168.1.88  | ACTIVE | phone",
-"",
-"Public nodes discovered...",
-"34.81.129.14  | EXTERNAL | cloud-vm",
-"45.77.91.203  | EXTERNAL | relay",
-"62.210.88.9   | EXTERNAL | mirror",
-"89.163.221.54 | EXTERNAL | cdn-edge",
-"104.21.12.88  | EXTERNAL | api-gateway",
-"138.68.77.19  | EXTERNAL | staging",
-"185.199.108.153 | EXTERNAL | github-mirror",
-"",
-"Hidden services...",
-"ghost.vnet.local      | MIRROR",
-"node_x93.hidden       | PROXY",
-"shadow-db.internal    | RESTRICTED",
-"blackcore.mesh        | ENCRYPTED",
-"",
-"Scan complete. 47 nodes discovered."
-];
-
-
-const uploadLines = [
-"Preparing payload...",
-"Scanning local workspace...",
-"Collecting exfiltrated data...",
-"Files queued: 47",
-"Total size: 38.6MB",
-"Compressing files...",
-"Compression method: LZMA",
-"Compression ratio: 62%",
-"Archive created: payload.7z",
-"Encrypting archive...",
-"Encryption: AES-256 + RSA-4096",
-"Generating session key...",
-"Session key locked",
-"Obfuscating file headers...",
-"Connecting to darknet dropzone...",
-"Resolving onion route...",
-"Route hops: 7",
-"Establishing secure tunnel...",
-"Tunnel latency: 183ms",
-"Authenticating dropzone...",
-"Auth token accepted",
-"Uploading blocks [#---------] 5%",
-"Uploading blocks [###-------] 23%",
-"Uploading blocks [#####-----] 41%",
-"Uploading blocks [#######---] 67%",
-"Uploading blocks [#########-] 89%",
-"Uploading blocks [##########] 100%",
-"Upload complete.",
-"Verifying checksum...",
-"Checksum: OK",
-"Validating remote integrity...",
-"[OK] integrity verified",
-"Syncing mirror node...",
-"Mirror status: online",
-"Registering payload hash...",
-"Hash ID: 8f9a2c91eab03f1d",
-"Cleaning local artifacts...",
-"Removing temporary archives...",
-"Purging memory buffers...",
-"Flushing DNS cache...",
-"Closing secure tunnel...",
-"Connection terminated",
-"Upload successful.",
-"Operation status: CLEAN"
-];
-
-/* ====== SPAM ENGINE ====== */
-function spam(arr,max,i=0){
-  if(i>=max){
-    writeLine("");
-    writeLine(">> Awaiting next command.\n");
-    startInput();
-    return;
-  }
-  writeLine(arr[Math.floor(Math.random()*arr.length)]);
-  setTimeout(()=>spam(arr,max,i+1),40+Math.random()*80);
-}
-
-boot();
+delay(BOOT,100,startInput);
 </script>
 </body>
 </html>
