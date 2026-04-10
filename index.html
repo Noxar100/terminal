@@ -1045,7 +1045,7 @@ const COMMANDS={
 };
 
 function startInput(){
-  inp.disabled=false;
+  inp.disabled = false;
   inp.focus();
 }
 
@@ -1062,7 +1062,7 @@ inp.addEventListener('keydown',e=>{
     if(!cmd){w('');return;}
     hist.unshift(cmd);hIdx=-1;
     w('<span class="dim">'+now()+'</span> <span class="ok">root@shadownet:~#</span> '+cmd);
-    inp.disabled=true;
+    inp.disabled = true;
     if(COMMANDS[cmd]) COMMANDS[cmd]();
     else if(cmd==='help') delay(HELP,28,startInput);
     else{w('<span class="err">bash: '+cmd+': command not found</span>');w('');startInput();}
