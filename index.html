@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -511,6 +511,46 @@ body:after{content:"";position:fixed;inset:0;z-index:20;pointer-events:none;opac
 @media(max-width:600px){#titlebar{gap:6px;padding:9px 10px}#titlebar .title{font-size:9px;letter-spacing:.7px;gap:5px}.brand-mark{width:20px;height:20px}.title-sub{display:none}.top-state{font-size:7px;letter-spacing:.4px}#ht{font-size:11px;padding:12px 10px}.qbtn{padding:7px 9px}}
 @media(prefers-reduced-motion:reduce){.qbtn{transition:none}}
 
+/* ===== MOBILE OPTIMIZATION ===== */
+html,body{height:100%;height:100dvh;overscroll-behavior:none}
+body{padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+
+/* a padEnd() igazítás csak így marad meg HTML-ben */
+.ln{white-space:pre-wrap;overflow-wrap:anywhere}
+#ht{overscroll-behavior:contain;-webkit-text-size-adjust:100%;scroll-behavior:auto}
+
+/* gyorsgombok: több soros, görgethető rács a 35 gomb helyett egy végtelen sor */
+#quickbar{
+  display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;
+  gap:6px;padding:8px 10px;
+  -webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
+}
+.qbtn{min-height:38px;min-width:44px;touch-action:manipulation;scroll-snap-align:start;user-select:none;-webkit-user-select:none}
+
+#inp-row{padding-bottom:max(10px,env(safe-area-inset-bottom))}
+#statusbar{padding-bottom:env(safe-area-inset-bottom)}
+#inp{min-height:36px}
+
+@media (max-width:600px){
+  .dot{display:none}                 /* hely spórolás a címsorban */
+  #titlebar{min-height:42px;justify-content:space-between}
+  #titlebar .title{flex:1;justify-content:flex-start;font-size:9px}
+  #ht{font-size:10.5px;line-height:1.6;padding:10px 8px}
+  #ps1{font-size:10px}
+  /* 2 soros gombsáv, hogy több parancs látszódjon egyszerre */
+  #quickbar{display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,auto);
+            grid-auto-columns:max-content;max-height:100px}
+  #statusbar .sb{padding:5px 8px;font-size:8px}
+}
+
+/* fekvő telefon: kevesebb fix elem */
+@media (max-height:420px){
+  #titlebar,#statusbar{display:none}
+  #quickbar{max-height:48px;grid-template-rows:1fr}
+}
+
+
+
 </style>
 </head>
 <body>
@@ -639,14 +679,15 @@ const SESSION_ID=hex(4).toUpperCase()+'-'+hex(4).toUpperCase()+'-'+hex(4).toUppe
 document.getElementById('sb-node').textContent=SESSION_NODE;
 document.getElementById('sb-sess').textContent=SESSION_ID;
 
+let scrollQueued=false;
 function w(text,cls=''){
   const d=document.createElement('span');
   d.className='ln'+(cls?' '+cls:'');
   d.innerHTML=text;
   T.appendChild(d);
-  T.scrollTop=T.scrollHeight;
+  if(!scrollQueued){scrollQueued=true;requestAnimationFrame(()=>{T.scrollTop=T.scrollHeight;scrollQueued=false;});}
+  while(T.childElementCount>600) T.removeChild(T.firstChild);   // ne nőjön végtelenre a DOM
 }
-
 let pendingTimers = [];
 
 function delay(lines,interval,done){
@@ -1790,6 +1831,24 @@ inp.addEventListener('keydown',e=>{
   if(e.key==='ArrowUp'){e.preventDefault();if(hIdx<hist.length-1){hIdx++;inp.value=hist[hIdx];}}
   if(e.key==='ArrowDown'){e.preventDefault();if(hIdx>0){hIdx--;inp.value=hist[hIdx];}else{hIdx=-1;inp.value='';}}
 });
+
+const IS_TOUCH = matchMedia('(hover:none)').matches;
+
+function startInput(){
+  inp.disabled = false;
+  if(!IS_TOUCH) inp.focus({preventScroll:true});   // telefonon csak az input érintésére nyíljon a billentyűzet
+}
+
+document.getElementById('ht').addEventListener('click',()=>{
+  if(!getSelection().toString() && !IS_TOUCH) inp.focus();
+});
+
+if(window.visualViewport){
+  const fit=()=>{ document.body.style.height = visualViewport.height+'px'; T.scrollTop=T.scrollHeight; };
+  visualViewport.addEventListener('resize',fit);
+  fit();
+}
+
 
 // tap outside input → refocus
 document.getElementById('ht').addEventListener('click',()=>inp.focus());
