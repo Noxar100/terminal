@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="theme-color" content="#050505">
+<meta name="theme-color" content="#07100f">
+<meta name="description" content="SHADOWNET — cyber operations terminal simulation.">
 <title>ShadowNet OS</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -88,13 +89,46 @@ body{display:flex;flex-direction:column}
 #statusbar::-webkit-scrollbar{display:none}
 .sb{font-size:9px;color:#2a5a2a;padding:3px 8px;white-space:nowrap;border-right:1px solid #1a3a1a}
 .sb span{color:#00aa30}
+
+/* SHADOWNET // CYBER OPERATIONS VISUAL SYSTEM */
+:root{color-scheme:dark;--bg:#060b0b;--panel:#0a1212;--panel2:#0d1918;--line:#183c36;--line2:#286d57;--green:#74ffc4;--cyan:#6ee7f5;--amber:#ffc66d;--red:#ff7180;--text:#d3e8df;--muted:#58776c}
+html,body{background:radial-gradient(ellipse at 50% -25%,rgba(18,91,69,.24),transparent 58%),var(--bg);color:var(--text)}
+body{isolation:isolate;position:relative}
+body:after{content:"";position:fixed;inset:0;z-index:20;pointer-events:none;opacity:.10;background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,rgba(126,255,203,.12) 4px)}
+#titlebar{min-height:50px;padding:10px 14px;gap:10px;background:linear-gradient(180deg,#101b1a,#091110);border-bottom:1px solid var(--line2);box-shadow:0 8px 28px #0005}
+#titlebar .title{display:flex;justify-content:center;align-items:center;gap:9px;color:#c4e8d9;font-size:10px;font-weight:700;letter-spacing:1.3px;text-shadow:0 0 16px #74ffc42e}
+.brand-mark{display:inline-grid;place-items:center;width:24px;height:24px;border:1px solid #3c9b79;border-radius:5px;color:var(--green);font-size:10px;letter-spacing:0;box-shadow:inset 0 0 12px #74ffc414,0 0 14px #74ffc414}
+.title-sep{color:#3a7460}.title-sub{color:#7da995;font-size:9px}
+.top-state{display:flex;align-items:center;gap:6px;color:#6ea58e;font-size:8px;letter-spacing:1px;white-space:nowrap}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 10px #74ffc4cc}
+.dot{width:9px;height:9px}.dot.r{background:#ff6f78;box-shadow:0 0 8px #ff6f7840}.dot.y{background:#ffc66d;box-shadow:0 0 8px #ffc66d30}.dot.g{background:#74ffc4;box-shadow:0 0 8px #74ffc440}
+#ht{background:linear-gradient(#74ffc405 1px,transparent 1px),linear-gradient(90deg,#74ffc405 1px,transparent 1px),linear-gradient(180deg,#081211fa,#050a0afa);background-size:24px 24px,24px 24px,auto;color:var(--green);font-size:12px;line-height:1.72;padding:16px clamp(12px,2.5vw,24px);scrollbar-color:#285b4a #08100f}
+#ht::-webkit-scrollbar{width:5px}#ht::-webkit-scrollbar-thumb{background:#285b4a;border-radius:4px}
+.ln{min-height:1.15em;overflow-wrap:anywhere;word-break:normal;text-shadow:0 0 10px #74ffc409}
+.dim{color:#648a79}.warn{color:var(--amber)}.err{color:var(--red)}.info{color:var(--cyan)}.ok{color:var(--green)}.hi{color:#f1fff9;font-weight:700}.cya{color:var(--cyan)}.mag{color:#e9a3ff}
+#inp-row{gap:10px;padding:12px 14px;background:linear-gradient(180deg,#0c1716,#08100f);border-top:1px solid var(--line2);box-shadow:0 -8px 24px #0003}
+#ps1{color:var(--green);font-size:12px;font-weight:700;text-shadow:0 0 12px #74ffc426}#inp{color:#e5fff2;caret-color:var(--green)}#inp::placeholder{color:#45685b}
+#quickbar{gap:6px;padding:9px 10px;background:#08100f;border-top:1px solid #122b26;border-bottom:1px solid #122b26}
+.qbtn{background:linear-gradient(180deg,#10231e,#0b1714);border:1px solid #204b3d;color:#9ce9c5;font-size:10px;font-weight:700;letter-spacing:.2px;padding:7px 11px;border-radius:5px;transition:border-color .15s,background .15s,color .15s,transform .15s}
+.qbtn:hover{color:#e6fff4;border-color:#55c99a;background:linear-gradient(180deg,#16382c,#0e211a)}.qbtn:active{transform:translateY(1px);background:#1b4938;color:white}
+.qbtn.virus-btn{border-color:#81333d;color:#ff9aa4;background:linear-gradient(180deg,#301218,#180b0e);box-shadow:inset 0 0 12px #ff304012}
+.qbtn.virus-btn:hover{border-color:#ff5264;color:#fff;background:linear-gradient(180deg,#4b1821,#250b10)}
+.qbtn.virus-btn.is-on{border-color:#ff354d;color:#fff;background:#5a101b;box-shadow:0 0 14px #ff304055}
+.virus-line{color:#8fb6a4;transition:color .45s}
+.virus-line.redline{color:#ff344f!important;text-shadow:none!important}
+.virus-panel-label{color:#ff6879;font-weight:bold;letter-spacing:1px}
+.qbtn:focus-visible,#inp:focus-visible{outline:1px solid var(--cyan);outline-offset:2px}
+#statusbar{background:#060d0c;border-top:1px solid #18372f}.sb{color:#648777;padding:6px 10px;font-size:9px;letter-spacing:.5px}.sb span{color:#92d8b7}.sb .status-secure{color:var(--green)}
+@media(max-width:600px){#titlebar{gap:6px;padding:9px 10px}#titlebar .title{font-size:9px;letter-spacing:.7px;gap:5px}.brand-mark{width:20px;height:20px}.title-sub{display:none}.top-state{font-size:7px;letter-spacing:.4px}#ht{font-size:11px;padding:12px 10px}.qbtn{padding:7px 9px}}
+@media(prefers-reduced-motion:reduce){.qbtn{transition:none}}
+
 </style>
 </head>
 <body>
 
 <div id="titlebar">
   <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
-  <div class="title">root@shadownet — encrypted shell v3.7.2</div>
+  <div class="title"><span class="brand-mark">SN</span><span>SHADOWNET</span><span class="title-sep">//</span><span class="title-sub">CYBER OPERATIONS TERMINAL</span></div><div class="top-state"><span class="live-dot"></span> LOCAL</div>
 </div>
 
 <div id="ht"></div>
@@ -134,6 +168,7 @@ body{display:flex;flex-direction:column}
   <button class="qbtn" onclick="runCmd('cat passwd')">passwd</button>
   <button class="qbtn" onclick="runCmd('cat shadow')">shadow</button>
   <button class="qbtn" onclick="runCmd('clear')">clear</button>
+  <button id="virusBtn" class="qbtn virus-btn" onclick="toggleVirus()">VIRUS</button>
 </div>
 
 
@@ -147,7 +182,8 @@ body{display:flex;flex-direction:column}
   <div class="sb">PROXY: <span>9 hops</span></div>
   <div class="sb">SESSION: <span id="sb-sess">—</span></div>
   <div class="sb">UPTIME: <span id="sb-time">00:00:00</span></div>
-  <div class="sb">STATUS: <span style="color:#00ff41">SECURE</span></div>
+  <div class="sb">MODE: <span>LAB / DEMO</span></div>
+  <div class="sb">STATUS: <span class="status-secure">SYSTEM READY</span></div>
 </div>
 
 <script>
@@ -170,6 +206,44 @@ const hex=n=>[...Array(n)].map(()=>Math.floor(Math.random()*16).toString(16)).jo
 const ip=()=>Array(4).fill(0).map(()=>rand(1,254)).join('.');
 const mac=()=>[...Array(6)].map(()=>hex(2)).join(':');
 const hash=()=>hex(64);
+
+let virusActive=false, virusTimer=null, virusLines=[], virusTick=0;
+const DEMO_IPS=['192.0.2.','198.51.100.','203.0.113.'];
+function toggleVirus(){
+  const btn=document.getElementById('virusBtn');
+  if(virusActive){
+    virusActive=false;clearInterval(virusTimer);virusTimer=null;
+    btn.textContent='VIRUS:';btn.classList.remove('is-on');
+    w('<span class="warn">VIRUS switched OFF — no network activity occurred.</span>');
+    startInput();return;
+  }
+  virusActive=true;virusTick=0;virusLines=[];
+  btn.textContent='☣ VIRUS: ON — CLICK TO STOP';btn.classList.add('is-on');
+  w('');w('<span class="virus-panel-label">╔══ VIRUS / IP FLOOD VISUALIZER — LOCAL══╗</span>');
+  w('<span class="warn">SIMULATION MODE: generated documentation-range IPs; no packets are sent.</span>');
+  w('<span class="dim">TIMESTAMP              SOURCE IP        NODE / MOCK DATA                       STATUS</span>');
+  for(let i=0;i<72;i++){
+    const prefix=DEMO_IPS[i%DEMO_IPS.length];
+    const address=prefix+(10+(i*7)%240);
+    const row=document.createElement('span');
+    row.className='ln virus-line';
+    row.textContent=now()+'   '+address.padEnd(16)+' NODE-'+hex(4).toUpperCase()+'   bytes='+(rand(128,65535))+'  hash='+hex(12)+'  [QUEUED]';
+    T.appendChild(row);virusLines.push(row);
+  }
+  w('<span class="virus-panel-label">[DEMO] WATCHING MOCK RECORDS — PRESS VIRUS: ON TO TURN OFF</span>');
+  T.scrollTop=T.scrollHeight;inp.disabled=false;startInput();
+  virusTimer=setInterval(()=>{
+    if(!virusActive)return;
+    for(let j=0;j<5 && virusTick<virusLines.length;j++,virusTick++){
+      const row=virusLines[virusTick];
+      row.classList.add('redline');
+      row.textContent=row.textContent.replace('[QUEUED]','[FLAGGED / DEMO]');
+    }
+    // Once flagged, rows stay steadily red; no flashing or blinking.
+    if(virusTick>=virusLines.length){clearInterval(virusTimer);virusTimer=null;}
+    T.scrollTop=T.scrollHeight;
+  },110);
+}
 
 const SESSION_NODE=ip();
 const SESSION_ID=hex(4).toUpperCase()+'-'+hex(4).toUpperCase()+'-'+hex(4).toUpperCase();
@@ -220,46 +294,6 @@ const BOOT=[
   [now()+' [0.356] proxy:  hop 4 → '+ip()+' [BR]','dim'],
   [now()+' [0.370] proxy:  hop 5 → '+ip()+' [DE]','dim'],
   [now()+' [0.385] proxy:  hop 6 → '+ip()+' [JP]','dim'],
-  [now()+' [0.399] proxy:  hop 7 → '+ip()+' [UA]','dim'],
-  [now()+' [0.412] proxy:  hop 8 → '+ip()+' [RO]','dim'],
-  [now()+' [0.428] proxy:  hop 9 → '+ip()+' [exit]','dim'],
-  [now()+' [0.450] proxy: chain OK — latency '+rand(200,400)+'ms','ok'],
-  [now()+' [0.480] obfuscation: traffic morphing ACTIVE','ok'],
-  [now()+' [0.521] auth: hash 0x'+hex(16)+' — VERIFIED','ok'],
-  [now()+' [0.548] auth: LEVEL 4 OPERATIVE — granted','ok'],
-  [now()+' [0.000] kernel: Linux 6.8.4-shadownet','dim'],
-  [now()+' [0.012] ACPI: RSDP enabled','dim'],
-  [now()+' [0.043] entropy pool: 4096 bits (RDRAND)','dim'],
-  [now()+' [0.071] modules: crypto/aes, net/tun','ok'],
-  [now()+' [0.118] crypto: AES-256-GCM loaded','ok'],
-  [now()+' [0.155] crypto: RSA-4096 engine ready','ok'],
-  [now()+' [0.188] net: eth0 UP — MAC '+mac(),'ok'],
-  [now()+' [0.203] net: tun0 adapter UP','ok'],
-  [now()+' [0.241] tor: daemon started (pid '+rand(400,600)+')','ok'],
-  [now()+' [0.290] proxy: building 9-hop chain...','dim'],
-  [now()+' [0.312] proxy:  hop 1 → '+ip()+' [NL]','dim'],
-  [now()+' [0.328] proxy:  hop 2 → '+ip()+' [RU]','dim'],
-  [now()+' [0.341] proxy:  hop 3 → '+ip()+' [CN]','dim'],
-  [now()+' [0.356] proxy:  hop 4 → '+ip()+' [BR]','dim'],
-  [now()+' [0.370] proxy:  hop 5 → '+ip()+' [DE]','dim'],
-  [now()+' [0.385] proxy:  hop 6 → '+ip()+' [JP]','dim'],
-  [now()+' [0.399] proxy:  hop 7 → '+ip()+' [UA]','dim'],
-  [now()+' [0.412] proxy:  hop 8 → '+ip()+' [RO]','dim'],
-  [now()+' [0.428] proxy:  hop 9 → '+ip()+' [exit]','dim'],
-  [now()+' [0.450] proxy: chain OK — latency '+rand(200,400)+'ms','ok'],
-  [now()+' [0.480] obfuscation: traffic morphing ACTIVE','ok'],
-  [now()+' [0.521] auth: hash 0x'+hex(16)+' — VERIFIED','ok'],
-  [now()+' [0.548] auth: LEVEL 4 OPERATIVE — granted','ok'],
-  [now()+' [0.000] kernel: Linux 6.8.4-shadownet','dim'],
-  [now()+' [0.012] ACPI: RSDP enabled','dim'],
-  [now()+' [0.043] entropy pool: 4096 bits (RDRAND)','dim'],
-  [now()+' [0.071] modules: crypto/aes, net/tun','ok'],
-  [now()+' [0.118] crypto: AES-256-GCM loaded','ok'],
-  [now()+' [0.155] crypto: RSA-4096 engine ready','ok'],
-  [now()+' [0.188] net: eth0 UP — MAC '+mac(),'ok'],
-  [now()+' [0.203] net: tun0 adapter UP','ok'],
-  [now()+' [0.241] tor: daemon started (pid '+rand(400,600)+')','ok'],
-  [now()+' [0.290] proxy: building 9-hop chain...','dim'],
   [now()+' [0.312] proxy:  hop 1 → '+ip()+' [NL]','dim'],
   [now()+' [0.328] proxy:  hop 2 → '+ip()+' [RU]','dim'],
   [now()+' [0.341] proxy:  hop 3 → '+ip()+' [CN]','dim'],
@@ -291,6 +325,7 @@ const HELP=[
   ['         ls  env  cat passwd  cat shadow',''],
   [' ',''],
   ['<span class="cya">NETWORK:</span> ifconfig  netstat  nmap  nmap full',''],
+  ['<span class="cya">VISUAL DEMO:</span> virus  off  (type off to stop)',''],
   ['          trace  dns  arp  monitor  wireshark',''],
   ['          ssh  dir',''],
   [' ',''],
@@ -308,6 +343,17 @@ const HELP=[
 ];
 
 const COMMANDS={
+
+  virus:()=>{
+    toggleVirus();
+    // Keep the command line available so `off` can stop the demo.
+    inp.disabled=false;startInput();
+  },
+
+  off:()=>{
+    if(virusActive) toggleVirus();
+    else {w('<span class="dim">[SYSTEM] No active visual demo.</span>');startInput();}
+  },
 
   whoami:()=>delay([
     [' ',''],
@@ -1342,6 +1388,11 @@ inp.addEventListener('keydown',e=>{
     if(!cmd){w('');return;}
     hist.unshift(cmd);hIdx=-1;
     w('<span class="dim">'+now()+'</span> <span class="ok">root@shadownet:~#</span> '+cmd);
+    if(virusActive && cmd!=='virus' && cmd!=='off'){
+      w('<span class="warn">[SIMULATION] Type <b>virus</b> to stop the visual demo before running another command.</span>');
+      startInput();
+      return;
+    }
     inp.disabled = true;
     if(COMMANDS[cmd]) COMMANDS[cmd]();
     else if(cmd==='help') delay(HELP,28,startInput);
