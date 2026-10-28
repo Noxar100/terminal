@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -13,395 +13,6 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;background:#050505;font-family:'Courier New',monospace}
 body{display:flex;flex-direction:column}
-
-
-
-/* =========================================
-   SHADOWNET OS — MOBILE RESPONSIVE PATCH
-   ========================================= */
-
-:root {
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --mobile-padding: clamp(8px, 2.5vw, 16px);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  width: 100%;
-  height: 100%;
-  height: 100dvh;
-  overflow: hidden;
-  overscroll-behavior: none;
-}
-
-body {
-  width: 100%;
-  height: 100%;
-  height: 100dvh;
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-
-  display: flex;
-  flex-direction: column;
-
-  padding-top: var(--safe-top);
-  padding-bottom: var(--safe-bottom);
-}
-
-/* Felső fejléc */
-#titlebar {
-  position: relative;
-  z-index: 2;
-  flex: 0 0 auto;
-  min-width: 0;
-  min-height: 46px;
-
-  padding: 8px var(--mobile-padding);
-  gap: 7px;
-}
-
-#titlebar .title {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-
-  font-size: clamp(8px, 2.4vw, 11px);
-  letter-spacing: clamp(0.3px, 0.2vw, 1px);
-}
-
-.brand-mark {
-  flex: 0 0 auto;
-  width: 23px;
-  height: 23px;
-}
-
-.title-sub {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.top-state {
-  flex: 0 0 auto;
-  font-size: 8px;
-  letter-spacing: 0.3px;
-}
-
-/* Terminál: ez kapja a szabad helyet */
-#ht {
-  flex: 1 1 0;
-  width: 100%;
-  min-width: 0;
-  min-height: 0;
-
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-
-  padding: 12px var(--mobile-padding) 18px;
-
-  font-size: clamp(11px, 2.9vw, 13px);
-  line-height: 1.65;
-
-  overflow-wrap: anywhere;
-  word-break: normal;
-  scrollbar-gutter: stable;
-}
-
-#ht .ln {
-  display: block;
-  max-width: 100%;
-  min-width: 0;
-
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  word-break: normal;
-}
-
-/* Hosszú, monospace adatsorok */
-#ht .virus-line {
-  font-size: 10px;
-  line-height: 1.55;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-/* Gyorsparancsok */
-#quickbar {
-  position: relative;
-  z-index: 3;
-
-  flex: 0 0 auto;
-  width: 100%;
-  min-width: 0;
-
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  gap: 7px;
-
-  padding: 8px var(--mobile-padding);
-
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-#quickbar::-webkit-scrollbar {
-  display: none;
-}
-
-.qbtn {
-  flex: 0 0 auto;
-  min-height: 36px;
-  padding: 8px 12px;
-
-  font-family: inherit;
-  font-size: 11px;
-  line-height: 1.2;
-
-  border-radius: 6px;
-  white-space: nowrap;
-  touch-action: manipulation;
-  cursor: pointer;
-}
-
-.qbtn:active {
-  transform: scale(0.97);
-}
-
-/* A hosszú vírusgomb ne szélesítse ki a sort */
-#virusBtn {
-  max-width: 220px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Parancsbeviteli sor */
-#inp-row {
-  flex: 0 0 auto;
-  width: 100%;
-  min-width: 0;
-
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  padding: 10px var(--mobile-padding);
-}
-
-#ps1 {
-  flex: 0 0 auto;
-  max-width: 44%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-#inp {
-  flex: 1 1 0;
-  width: 0;
-  min-width: 0;
-  max-width: 100%;
-
-  padding: 5px 0;
-  font-size: 16px;
-  line-height: 1.4;
-
-  appearance: none;
-  -webkit-appearance: none;
-  border-radius: 0;
-  touch-action: manipulation;
-}
-
-#inp:disabled {
-  opacity: 0.65;
-}
-
-/* Állapotsor */
-#statusbar {
-  flex: 0 0 auto;
-  width: 100%;
-  min-width: 0;
-
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: stretch;
-
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-#statusbar::-webkit-scrollbar {
-  display: none;
-}
-
-.sb {
-  flex: 0 0 auto;
-  padding: 7px 9px;
-  font-size: 9px;
-  line-height: 1.3;
-}
-
-/* Kis telefonok */
-@media (max-width: 380px) {
-  #titlebar {
-    gap: 5px;
-    padding-left: 8px;
-    padding-right: 8px;
-  }
-
-  #titlebar .title {
-    gap: 4px;
-    font-size: 8px;
-    letter-spacing: 0.2px;
-  }
-
-  .dot {
-    width: 7px;
-    height: 7px;
-  }
-
-  .brand-mark {
-    width: 19px;
-    height: 19px;
-    font-size: 9px;
-  }
-
-  .title-sep,
-  .title-sub {
-    display: none;
-  }
-
-  .top-state {
-    font-size: 7px;
-  }
-
-  #ht {
-    padding: 10px 9px 14px;
-    font-size: 11px;
-    line-height: 1.6;
-  }
-
-  #quickbar {
-    gap: 6px;
-    padding: 7px 8px;
-  }
-
-  .qbtn {
-    min-height: 36px;
-    padding: 8px 10px;
-    font-size: 10px;
-  }
-
-  #inp-row {
-    gap: 6px;
-    padding: 9px 8px;
-  }
-
-  #ps1 {
-    max-width: 42%;
-    font-size: 10px;
-  }
-
-  .sb {
-    padding: 7px 8px;
-    font-size: 8px;
-  }
-}
-
-/* Fekvő telefon */
-@media (max-height: 500px) and (orientation: landscape) {
-  #titlebar {
-    min-height: 34px;
-    padding-top: 4px;
-    padding-bottom: 4px;
-  }
-
-  .brand-mark {
-    width: 18px;
-    height: 18px;
-  }
-
-  #ht {
-    padding-top: 7px;
-    padding-bottom: 9px;
-  }
-
-  #quickbar {
-    padding-top: 4px;
-    padding-bottom: 4px;
-  }
-
-  .qbtn {
-    min-height: 30px;
-    padding: 5px 9px;
-  }
-
-  #inp-row {
-    padding-top: 5px;
-    padding-bottom: 5px;
-  }
-
-  #statusbar .sb {
-    padding-top: 4px;
-    padding-bottom: 4px;
-  }
-}
-
-/* Nagyobb kijelzők */
-@media (min-width: 768px) {
-  #ht {
-    padding: 18px clamp(20px, 4vw, 48px);
-    font-size: 13px;
-  }
-
-  #quickbar {
-    flex-wrap: wrap;
-  }
-
-  .qbtn {
-    min-height: 34px;
-  }
-}
-
-/* Billentyűzetes navigáció */
-.qbtn:focus-visible,
-#inp:focus-visible {
-  outline: 2px solid var(--cyan);
-  outline-offset: 2px;
-}
-
-/* Mozgáscsökkentés */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
-
-
 
 #titlebar{
   background:#0d0d0d;
@@ -511,53 +122,13 @@ body:after{content:"";position:fixed;inset:0;z-index:20;pointer-events:none;opac
 @media(max-width:600px){#titlebar{gap:6px;padding:9px 10px}#titlebar .title{font-size:9px;letter-spacing:.7px;gap:5px}.brand-mark{width:20px;height:20px}.title-sub{display:none}.top-state{font-size:7px;letter-spacing:.4px}#ht{font-size:11px;padding:12px 10px}.qbtn{padding:7px 9px}}
 @media(prefers-reduced-motion:reduce){.qbtn{transition:none}}
 
-/* ===== MOBILE OPTIMIZATION ===== */
-html,body{height:100%;height:100dvh;overscroll-behavior:none}
-body{padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
-
-/* a padEnd() igazítás csak így marad meg HTML-ben */
-.ln{white-space:pre-wrap;overflow-wrap:anywhere}
-#ht{overscroll-behavior:contain;-webkit-text-size-adjust:100%;scroll-behavior:auto}
-
-/* gyorsgombok: több soros, görgethető rács a 35 gomb helyett egy végtelen sor */
-#quickbar{
-  display:flex;flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;
-  gap:6px;padding:8px 10px;
-  -webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;
-}
-.qbtn{min-height:38px;min-width:44px;touch-action:manipulation;scroll-snap-align:start;user-select:none;-webkit-user-select:none}
-
-#inp-row{padding-bottom:max(10px,env(safe-area-inset-bottom))}
-#statusbar{padding-bottom:env(safe-area-inset-bottom)}
-#inp{min-height:36px}
-
-@media (max-width:600px){
-  .dot{display:none}                 /* hely spórolás a címsorban */
-  #titlebar{min-height:42px;justify-content:space-between}
-  #titlebar .title{flex:1;justify-content:flex-start;font-size:9px}
-  #ht{font-size:10.5px;line-height:1.6;padding:10px 8px}
-  #ps1{font-size:10px}
-  /* 2 soros gombsáv, hogy több parancs látszódjon egyszerre */
-  #quickbar{display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,auto);
-            grid-auto-columns:max-content;max-height:100px}
-  #statusbar .sb{padding:5px 8px;font-size:8px}
-}
-
-/* fekvő telefon: kevesebb fix elem */
-@media (max-height:420px){
-  #titlebar,#statusbar{display:none}
-  #quickbar{max-height:48px;grid-template-rows:1fr}
-}
-
-
-
 </style>
 </head>
 <body>
 
 <div id="titlebar">
   <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
-  <div class="title"><span class="brand-mark">SN</span><span>SHADOWNET</span><span class="title-sep">//</span><span class="title-sub">CYBER OPERATIONS TERMINAL</span></div><div class="top-state"><span class="live-dot"></span> LOCAL</div>
+  <div class="title"><span class="brand-mark">SN</span><span>SHADOWNET</span><span class="title-sep">//</span><span class="title-sub">CYBER OPERATIONS TERMINAL</span></div><div class="top-state"><span class="live-dot"></span> LOCAL SIMULATION</div>
 </div>
 
 <div id="ht"></div>
@@ -611,7 +182,7 @@ body{padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left)
   <div class="sb">PROXY: <span>9 hops</span></div>
   <div class="sb">SESSION: <span id="sb-sess">—</span></div>
   <div class="sb">UPTIME: <span id="sb-time">00:00:00</span></div>
-  <div class="sb">MODE: <span>LAB</span></div>
+  <div class="sb">MODE: <span>LAB / DEMO</span></div>
   <div class="sb">STATUS: <span class="status-secure">SYSTEM READY</span></div>
 </div>
 
@@ -642,13 +213,13 @@ function toggleVirus(){
   const btn=document.getElementById('virusBtn');
   if(virusActive){
     virusActive=false;clearInterval(virusTimer);virusTimer=null;
-    btn.textContent='VIRUS:';btn.classList.remove('is-on');
-    w('<span class="warn">VIRUS switched OFF — no network activity occurred.</span>');
+    btn.textContent='☣ VIRUS: OFF';btn.classList.remove('is-on');
+    w('<span class="warn"> VIRUS switched OFF — no network activity occurred.</span>');
     startInput();return;
   }
   virusActive=true;virusTick=0;virusLines=[];
   btn.textContent='VIRUS ON';btn.classList.add('is-on');
-  w('');w('<span class="virus-panel-label">╔══ VIRUS / IP FLOOD VISUALIZER — LOCAL══╗</span>');
+  w('');w('<span class="virus-panel-label">╔══ VIRUS / IP FLOOD VISUALIZER — LOCAL ONLY ══╗</span>');
   w('<span class="warn">SIMULATION MODE: generated documentation-range IPs; no packets are sent.</span>');
   w('<span class="dim">TIMESTAMP              SOURCE IP        NODE / MOCK DATA                       STATUS</span>');
   for(let i=0;i<72;i++){
@@ -679,15 +250,14 @@ const SESSION_ID=hex(4).toUpperCase()+'-'+hex(4).toUpperCase()+'-'+hex(4).toUppe
 document.getElementById('sb-node').textContent=SESSION_NODE;
 document.getElementById('sb-sess').textContent=SESSION_ID;
 
-let scrollQueued=false;
 function w(text,cls=''){
   const d=document.createElement('span');
   d.className='ln'+(cls?' '+cls:'');
   d.innerHTML=text;
   T.appendChild(d);
-  if(!scrollQueued){scrollQueued=true;requestAnimationFrame(()=>{T.scrollTop=T.scrollHeight;scrollQueued=false;});}
-  while(T.childElementCount>600) T.removeChild(T.firstChild);   // ne nőjön végtelenre a DOM
+  T.scrollTop=T.scrollHeight;
 }
+
 let pendingTimers = [];
 
 function delay(lines,interval,done){
@@ -724,6 +294,46 @@ const BOOT=[
   [now()+' [0.356] proxy:  hop 4 → '+ip()+' [BR]','dim'],
   [now()+' [0.370] proxy:  hop 5 → '+ip()+' [DE]','dim'],
   [now()+' [0.385] proxy:  hop 6 → '+ip()+' [JP]','dim'],
+  [now()+' [0.399] proxy:  hop 7 → '+ip()+' [UA]','dim'],
+  [now()+' [0.412] proxy:  hop 8 → '+ip()+' [RO]','dim'],
+  [now()+' [0.428] proxy:  hop 9 → '+ip()+' [exit]','dim'],
+  [now()+' [0.450] proxy: chain OK — latency '+rand(200,400)+'ms','ok'],
+  [now()+' [0.480] obfuscation: traffic morphing ACTIVE','ok'],
+  [now()+' [0.521] auth: hash 0x'+hex(16)+' — VERIFIED','ok'],
+  [now()+' [0.548] auth: LEVEL 4 OPERATIVE — granted','ok'],
+  [now()+' [0.000] kernel: Linux 6.8.4-shadownet','dim'],
+  [now()+' [0.012] ACPI: RSDP enabled','dim'],
+  [now()+' [0.043] entropy pool: 4096 bits (RDRAND)','dim'],
+  [now()+' [0.071] modules: crypto/aes, net/tun','ok'],
+  [now()+' [0.118] crypto: AES-256-GCM loaded','ok'],
+  [now()+' [0.155] crypto: RSA-4096 engine ready','ok'],
+  [now()+' [0.188] net: eth0 UP — MAC '+mac(),'ok'],
+  [now()+' [0.203] net: tun0 adapter UP','ok'],
+  [now()+' [0.241] tor: daemon started (pid '+rand(400,600)+')','ok'],
+  [now()+' [0.290] proxy: building 9-hop chain...','dim'],
+  [now()+' [0.312] proxy:  hop 1 → '+ip()+' [NL]','dim'],
+  [now()+' [0.328] proxy:  hop 2 → '+ip()+' [RU]','dim'],
+  [now()+' [0.341] proxy:  hop 3 → '+ip()+' [CN]','dim'],
+  [now()+' [0.356] proxy:  hop 4 → '+ip()+' [BR]','dim'],
+  [now()+' [0.370] proxy:  hop 5 → '+ip()+' [DE]','dim'],
+  [now()+' [0.385] proxy:  hop 6 → '+ip()+' [JP]','dim'],
+  [now()+' [0.399] proxy:  hop 7 → '+ip()+' [UA]','dim'],
+  [now()+' [0.412] proxy:  hop 8 → '+ip()+' [RO]','dim'],
+  [now()+' [0.428] proxy:  hop 9 → '+ip()+' [exit]','dim'],
+  [now()+' [0.450] proxy: chain OK — latency '+rand(200,400)+'ms','ok'],
+  [now()+' [0.480] obfuscation: traffic morphing ACTIVE','ok'],
+  [now()+' [0.521] auth: hash 0x'+hex(16)+' — VERIFIED','ok'],
+  [now()+' [0.548] auth: LEVEL 4 OPERATIVE — granted','ok'],
+  [now()+' [0.000] kernel: Linux 6.8.4-shadownet','dim'],
+  [now()+' [0.012] ACPI: RSDP enabled','dim'],
+  [now()+' [0.043] entropy pool: 4096 bits (RDRAND)','dim'],
+  [now()+' [0.071] modules: crypto/aes, net/tun','ok'],
+  [now()+' [0.118] crypto: AES-256-GCM loaded','ok'],
+  [now()+' [0.155] crypto: RSA-4096 engine ready','ok'],
+  [now()+' [0.188] net: eth0 UP — MAC '+mac(),'ok'],
+  [now()+' [0.203] net: tun0 adapter UP','ok'],
+  [now()+' [0.241] tor: daemon started (pid '+rand(400,600)+')','ok'],
+  [now()+' [0.290] proxy: building 9-hop chain...','dim'],
   [now()+' [0.312] proxy:  hop 1 → '+ip()+' [NL]','dim'],
   [now()+' [0.328] proxy:  hop 2 → '+ip()+' [RU]','dim'],
   [now()+' [0.341] proxy:  hop 3 → '+ip()+' [CN]','dim'],
@@ -1831,24 +1441,6 @@ inp.addEventListener('keydown',e=>{
   if(e.key==='ArrowUp'){e.preventDefault();if(hIdx<hist.length-1){hIdx++;inp.value=hist[hIdx];}}
   if(e.key==='ArrowDown'){e.preventDefault();if(hIdx>0){hIdx--;inp.value=hist[hIdx];}else{hIdx=-1;inp.value='';}}
 });
-
-const IS_TOUCH = matchMedia('(hover:none)').matches;
-
-function startInput(){
-  inp.disabled = false;
-  if(!IS_TOUCH) inp.focus({preventScroll:true});   // telefonon csak az input érintésére nyíljon a billentyűzet
-}
-
-document.getElementById('ht').addEventListener('click',()=>{
-  if(!getSelection().toString() && !IS_TOUCH) inp.focus();
-});
-
-if(window.visualViewport){
-  const fit=()=>{ document.body.style.height = visualViewport.height+'px'; T.scrollTop=T.scrollHeight; };
-  visualViewport.addEventListener('resize',fit);
-  fit();
-}
-
 
 // tap outside input → refocus
 document.getElementById('ht').addEventListener('click',()=>inp.focus());
