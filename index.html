@@ -231,7 +231,7 @@ function toggleVirus(){
     T.appendChild(row);virusLines.push(row);
   }
   w('<span class="virus-panel-label">[DEMO] WATCHING MOCK RECORDS — PRESS VIRUS: ON TO TURN OFF</span>');
-  T.scrollTop=T.scrollHeight;inp.disabled=false;startInput();
+  T.scrollTop=T.scrollHeight;inp.disabled=false;inp.blur();startInput();
   virusTimer=setInterval(()=>{
     if(!virusActive)return;
     for(let j=0;j<5 && virusTick<virusLines.length;j++,virusTick++){
